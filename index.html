@@ -552,8 +552,15 @@ button:not(:disabled):active {
                 min-width: 0; /* Allow shrinking */
             }
             
-            /* Force all elements to respect container width */
-            * {
+            /* Constrain main layout containers to respect container width */
+            .app,
+            .board,
+            .pad,
+            .grid-wrap,
+            .util-buttons,
+            header,
+            select,
+            button {
                 max-width: 100%;
                 box-sizing: border-box;
             }
