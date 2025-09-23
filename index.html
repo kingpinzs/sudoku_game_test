@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Sudoku — Mobile Vanilla (Bright + Clear)</title>
+    <style>
+        :root {
+            --bg: #f7f9fe;
+            --panel: #ffffff;
+            --text: #0d1321;
+            --muted: #5a657a;
+            --accent: #1352ff;
+            --accent-2: #0ea86f;
+            --warn: #e7a100;
+            --error: #d64545;
+
+            --grid-line: #cfd7eb;
+            /* thin 1px */
+            --grid-strong: #7986cb;
+            /* thick 3×3 */
+            --grid-outer: #3f51b5;
+            /* outer frame */
+
+            --sel: #e9f1ff;
+            --hilite: #f3f6ff;
+            --ok: #1d936d;
+
+            --btn-bg: #ffffff;
+            /* keypad buttons */
+            --btn-fg: #0d1321;
+            --btn-border: #cfd7eb;
+
+            --shadow: 0 6px 20px rgba(20, 32, 70, .10);
+            --radius: 14px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1124;
+                --panel: #171a33;
+                --text: #eaf0ff;
+                --muted: #aab3d0;
+                --accent: #5dd3ff;
+                --accent-2: #8dffb0;
+                --warn: #ffbe55;
+                --error: #ff6b6b;
+                --grid-line: #303a66;
+                --grid-strong: #6e79bf;
+                --grid-outer: #9aa5ff;
+                --sel: #223064;
+                --hilite: #1b2450;
+                --ok: #21bc8b;
+
+                --btn-bg: #1e2347;
+                --btn-fg: #eaf0ff;
+                --btn-border: #3a4a80;
+                --shadow: 0 10px 28px rgba(0, 0, 0, .35);
+            }
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, var(--bg), #eef3ff 65%);
+            color: var(--text);
+            font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .app {
+            width: min(1020px, 100%);
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+
+        header {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        header .left,
+        header .right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        select,
+        button {
+            appearance: none;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            background: #f3f6ff;
+            color: var(--text);
+            box-shadow: inset 0 0 0 1px var(--grid-line);
+        }
+
+        select {
+            min-width: 140px
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: none
+        }
+
+        button.warn {
+            background: var(--warn);
+            color: #1f1400
+        }
+
+        button:disabled {
+            opacity: .6
+        }
+
+        .grid-wrap {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+
+        .board {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            aspect-ratio: 1/1;
+            position: relative;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* === BOARD FRAME === */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: inset 0 0 0 3px var(--grid-outer);
+        }
+
+        /* === CELLS & LINES === */
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: clamp(18px, 5.1vw, 28px);
+            color: var(--text);
+            background: transparent;
+            position: relative;
+            border-right: 1px solid var(--grid-line);
+            border-bottom: 1px solid var(--grid-line);
+        }
+
+        .cell[data-c="1"] {
+            border-left: 3px solid var(--grid-outer);
+        }
+
+        .cell[data-r="1"] {
+            border-top: 3px solid var(--grid-outer);
+        }
+
+        .cell[data-c="9"] {
+            border-right: 3px solid var(--grid-outer);
+        }
+
+        .cell[data-r="9"] {
+            border-bottom: 3px solid var(--grid-outer);
+        }
+
+        /* THICK 3×3 boundaries */
+        .cell[data-c="3"],
+        .cell[data-c="6"] {
+            border-right: 3px solid var(--grid-strong);
+        }
+
+        .cell[data-r="3"],
+        .cell[data-r="6"] {
+            border-bottom: 3px solid var(--grid-strong);
+        }
+
+        .cell[data-given="1"] {
+            color: #2b4cff;
+            opacity: .95
+        }
+
+        /* states */
+        .cell.selected {
+            background: var(--sel)
+        }
+
+        .cell.hilite {
+            background: var(--hilite)
+        }
+
+        .cell.dup {
+            background: color-mix(in oklab, var(--error) 18%, transparent);
+        }
+
+        .cell.hint-target {
+            outline: 3px solid var(--accent-2);
+            z-index: 2
+        }
+
+        .cell.error {
+            animation: blink .7s ease-in-out 0s 3;
+        }
+
+        .cell.selected {
+            outline: 2px solid #3b82f6;
+            /* A bright blue outline */
+            outline-offset: -2px;
+            /* Draws the outline inside the cell bounds */
+        }
+
+        /* --- CSS for Pencil Functionality --- */
+
+        /* Make cell a positioning container for the pencil grid */
+        .cell {
+            position: relative;
+        }
+
+        /* The grid that holds the small pencil numbers */
+        .pencil-grid {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            font-size: 0.7rem;
+            /* Adjust size as needed */
+            color: #4a5568;
+            /* A dimmer color for notes */
+            pointer-events: none;
+            /* Allows clicking "through" the grid onto the cell */
+        }
+
+        /* A single pencil number container */
+        .pencil-grid span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Style for the pencil button when it's active */
+        #pencil.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                background: transparent
+            }
+
+            50% {
+                background: color-mix(in oklab, var(--error) 22%, transparent)
+            }
+        }
+
+        /* === KEYPAD (high contrast) === */
+        .pad {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .pad button {
+            background: var(--btn-bg);
+            color: var(--btn-fg);
+            font-weight: 900;
+            font-size: 22px;
+            padding: 14px 12px;
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 2px var(--btn-border);
+        }
+
+        .pad button:active {
+            transform: translateY(1px);
+        }
+
+        .pad button[data-num] {
+            font-feature-settings: "tnum", "cv02";
+        }
+
+        .pad button.action {
+            font-size: 14px;
+            font-weight: 800
+        }
+
+        .pad button.clear {
+            background: #fff5f5;
+            box-shadow: inset 0 0 0 2px #f3b7b7;
+            color: #7a0f0f;
+        }
+
+        .legend {
+            color: var(--muted);
+            font-size: 13px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 0 2px;
+        }
+
+        .legend .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px
+        }
+
+        .dot.hi {
+            background: var(--hilite)
+        }
+
+        .dot.sel {
+            background: var(--sel)
+        }
+
+        .dot.dup {
+            background: color-mix(in oklab, var(--error) 45%, transparent)
+        }
+
+        .dot.hint {
+            background: color-mix(in oklab, var(--accent-2) 65%, transparent)
+        }
+
+        .status {
+            font-size: 14px;
+            color: var(--muted);
+            padding: 0 2px 6px 2px;
+            min-height: 1.2em;
+        }
+
+        .utils {
+            width: 88px;
+            background: white;
+            height: 50px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* --- Visual Polish & New Feature CSS --- */
+
+        /* Fix for selection outline conflicting with grid borders */
+        .cell.selected {
+            outline: none;
+            /* Remove the old outline */
+            box-shadow: inset 0 0 0 3px var(--accent);
+            background-color: var(--sel);
+        }
+
+        /* Modal styles for Pause and Game Over screens */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--panel);
+            padding: 30px 40px;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-content h2 {
+            margin: 0 0 20px 0;
+            color: var(--text);
+        }
+
+        /* Utility class to hide modals */
+        .hidden {
+            display: none;
+        }
+
+
+/* Style for when you hover over any clickable button */
+button:not(:disabled):hover {
+  cursor: pointer;
+  filter: brightness(110%); /* Makes the button slightly brighter */
+}
+
+/* Style for when you are actively pressing down on any clickable button */
+button:not(:disabled):active {
+  transform: translateY(1px); /* Gives a "push down" effect */
+  filter: brightness(90%);   /* Makes the button slightly darker */
+}
+
+        /* Desktop tweaks */
+        @media (min-width: 760px) {
+            .app {
+                grid-template-columns: 1fr 360px;
+                align-items: start
+            }
+
+            .grid-wrap {
+                grid-column: 1 / 2;
+            }
+
+            .side {
+                grid-column: 2 / 3;
+                display: flex;
+                flex-direction: column;
+                gap: 12px
+            }
+
+            .pad {
+                grid-template-columns: repeat(5, 1fr)
+            }
+
+            .board {
+                max-width: 680px;
+                margin-inline: auto
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="right">
+                <button id="new" class="primary">New Game</button>
+                <button id="pause-btn">Pause</button>
+            </div>
+            <div class="left">
+                <label style="display:flex;align-items:center;gap:8px">
+                    <select id="mode">
+                        <option value="beginner">Beginner (guided)</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </label>
+            </div>
+            <div class="status" id="status"></div>
+        </header>
+
+
+        <div class="game-stats">
+            <!-- Future use: time elapsed, moves made, etc. -->
+            <div class="timer" id="timer"></div>
+            <div class="wrong-moves" id="wrong-moves"></div>
+
+        </div>
+        <div class="grid-wrap">
+
+            <div class="board" id="board" aria-label="Sudoku board">
+                <div class="grid" id="grid" role="grid" aria-rowcount="9" aria-colcount="9"></div>
+            </div>
+            <div class="legend">
+                <span><span class="dot sel"></span>Selected</span>
+                <span><span class="dot hi"></span>Row/Box highlight</span>
+                <span><span class="dot dup"></span>Duplicate warning</span>
+                <span><span class="dot hint"></span>Beginner: correct location hint</span>
+                <span>Tip: tap the same number again to <strong>clear</strong>, or use <strong>Clear ⌫</strong>.</span>
+            </div>
+            <div class="util-buttons" style="display:flex;gap:8px;">
+                <button class="action utils" id="check">Check Cell</button>
+                <button class="action utils" id="hint">Hint</button>
+                <button class="action utils" id="undo">Undo</button>
+                <button class="action utils" id="pencil">Pencil</button>
+            </div>
+        </div>
+
+        <div class="side">
+            <div class="pad" id="pad" aria-label="Number pad">
+                <button data-num="1">1</button>
+                <button data-num="2">2</button>
+                <button data-num="3">3</button>
+                <button data-num="4">4</button>
+                <button data-num="5">5</button>
+                <button data-num="6">6</button>
+                <button data-num="7">7</button>
+                <button data-num="8">8</button>
+                <button data-num="9">9</button>
+                <button class="action clear" id="clear">Clear ⌫</button>
+            </div>
+        </div>
+
+    </div>
+    <div id="pause-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Paused</h2>
+            <button id="resume-btn" class="primary">Resume</button>
+        </div>
+    </div>
+    <div id="game-over-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="game-over-message"></h2>
+            <button id="new-game-modal-btn" class="primary">New Game</button>
+        </div>
+    </div>
+    <script src="puzzles.js"></script>
+    <script>
+        const $ = (sel, root = document) => root.querySelector(sel);
+        const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+
+        let state = {
+            mode: 'beginner',
+            givens: Array(81).fill(0),
+            cells: Array(81).fill(0),
+            solution: Array(81).fill(0),
+            sel: null,
+            pencilMode: false,
+            pencils: [],
+            timerId: null,
+            elapsedSeconds: 0,
+            wrongMoves: 0,
+            wrongMovesLimit: Infinity,
+            gameOver: false,
+            isPaused: false,
+            history: [],
+            future: []
+        };
+
+        function idx(r, c) { return (r * 9) + c; }
+        function rc(index) { return [Math.floor(index / 9), index % 9]; }
+
+        function loadPuzzle(mode) {
+            if (state.timerId) clearInterval(state.timerId);
+            state.mode = mode;
+            const pick = PUZZLES[mode][Math.floor(Math.random() * PUZZLES[mode].length)];
+            state.givens = pick.givens.split('').map(n => +n);
+            state.solution = pick.solution.split('').map(n => +n);
+            state.cells = [...state.givens];
+            state.pencils = Array.from({ length: 81 }, () => new Set());
+            state.sel = null;
+            state.pencilMode = false;
+            $('#pencil').classList.remove('active');
+            state.history = [];
+            state.future = [];
+            state.elapsedSeconds = 0;
+            $('#timer').textContent = '00:00';
+            state.timerId = setInterval(timerTick, 1000);
+            state.wrongMoves = 0;
+            state.gameOver = false;
+            switch (mode) {
+                case 'easy':
+                    state.wrongMovesLimit = 5;
+                    break;
+                case 'medium':
+                    state.wrongMovesLimit = 3;
+                    break;
+                case 'hard':
+                    // 0 wrong moves allowed means the 1st mistake ends the game
+                    state.wrongMovesLimit = 1;
+                    break;
+                default: // beginner
+                    state.wrongMovesLimit = Infinity;
+                    break;
+            }
+            renderBoard();
+            updateWrongMovesDisplay();
+            setStatus(`Mode: ${modeLabel(mode)}. Good luck!`);
+        }
+        function modeLabel(m) { return { beginner: "Beginner", easy: "Easy", medium: "Medium", hard: "Hard" }[m] || m; }
+
+        const gridEl = $('#grid');
+
+        function renderBoard() {
+            gridEl.innerHTML = '';
+            for (let i = 0; i < 81; i++) {
+                const r = Math.floor(i / 9), c = i % 9;
+                const v = state.cells[i];
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.setAttribute('role', 'gridcell');
+                cell.dataset.i = i;
+                cell.dataset.r = r + 1; // 1..9
+                cell.dataset.c = c + 1; // 1..9
+                const given = state.givens[i] !== 0;
+                cell.dataset.given = given ? '1' : '0';
+                cell.tabIndex = given ? -1 : 0;
+                cell.textContent = v === 0 ? '' : v;
+                cell.addEventListener('click', () => selectCell(i));
+                cell.addEventListener('keydown', (e) => {
+                    if (given) return;
+                    if (e.key >= '1' && e.key <= '9') { place(+e.key); }
+                    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { erase(); }
+                    if (e.key === 'ArrowLeft') { moveSel(0, -1) }
+                    if (e.key === 'ArrowRight') { moveSel(0, 1) }
+                    if (e.key === 'ArrowUp') { moveSel(-1, 0) }
+                    if (e.key === 'ArrowDown') { moveSel(1, 0) }
+                });
+                gridEl.appendChild(cell);
+                renderPencils(cell, i);
+            }
+            paintSelection();
+        }
+
+        function selectCell(i) {
+            state.sel = i;
+            paintSelection();
+        }
+        function $cell(r, c) { return $(`.cell[data-r="${r + 1}"][data-c="${c + 1}"]`, gridEl) }
+        function cellAt(i) { const r = Math.floor(i / 9), c = i % 9; return $cell(r, c); }
+
+        function paintSelection() {
+            $$('.cell', gridEl).forEach(el => {
+                el.classList.remove('selected', 'hilite', 'dup', 'hint-target', 'error');
+            });
+            if (state.sel == null) return;
+            const r = Math.floor(state.sel / 9), c = state.sel % 9;
+
+            if (state.mode === 'beginner' || state.mode === 'easy') {
+                for (let cc = 0; cc < 9; cc++) $cell(r, cc).classList.add('hilite');
+            }
+            if (state.mode === 'beginner') {
+                const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+                for (let rr = br; rr < br + 3; rr++) for (let cc = bc; cc < bc + 3; cc++) $cell(rr, cc).classList.add('hilite');
+            }
+            $cell(r, c).classList.add('selected');
+        }
+
+        function duplicatesFor(i, val) {
+            const r = Math.floor(i / 9), c = i % 9;
+            const hits = new Set();
+
+            // Check row
+            for (let k = 0; k < 9; k++) {
+                const j = r * 9 + k;
+                if (j !== i && state.cells[j] === val) hits.add(j);
+            }
+
+            // Check column (this is the line that was fixed)
+            for (let k = 0; k < 9; k++) { // <-- Changed k() to k++
+                const j = k * 9 + c;
+                if (j !== i && state.cells[j] === val) hits.add(j);
+            }
+
+            // Check 3x3 box
+            const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+            for (let rr = br; rr < br + 3; rr++) {
+                for (let cc = bc; cc < bc + 3; cc++) {
+                    const j = rr * 9 + cc;
+                    if (j !== i && state.cells[j] === val) hits.add(j);
+                }
+            }
+            return [...hits];
+        }
+
+        function clearFeedback() { $$('.cell').forEach(el => el.classList.remove('dup', 'hint-target', 'error')); }
+
+        function applyImmediateFeedback(i, val) {
+            clearFeedback();
+            if (state.mode === 'hard') { setStatus(''); return; }
+
+            const dups = duplicatesFor(i, val);
+            if (dups.length) {
+                [i, ...dups].forEach(j => cellAt(j).classList.add('dup'));
+                setStatus('Duplicate detected in row/column/box.');
+                return;
+            }
+            const correct = state.solution[i] === val;
+            if (correct) { setStatus('Looks good.'); return; }
+
+            state.wrongMoves++;
+            updateWrongMovesDisplay();
+
+            if (state.wrongMovesLimit !== Infinity && state.wrongMoves >= state.wrongMovesLimit) {
+                if (state.timerId) clearInterval(state.timerId);
+                state.gameOver = true;
+                cellAt(i).classList.add('error');
+                showGameOverModal('Game Over! You\'ve made too many mistakes.'); // Use the modal
+                saveGame(); // Save the final state
+                return;
+            }
+
+            if (state.mode === 'beginner') {
+                const r = Math.floor(i / 9), c = i % 9;
+                let target = -1;
+                for (let cc = 0; cc < 9; cc++) { const j = r * 9 + cc; if (state.solution[j] === val) { target = j; break; } }
+                if (target === -1) {
+                    const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+                    for (let rr = br; rr < br + 3 && target === -1; rr++)
+                        for (let cc = bc; cc < bc + 3; cc++) {
+                            const j = rr * 9 + cc; if (state.solution[j] === val) { target = j; break; }
+                        }
+                }
+                if (target !== -1) { cellAt(target).classList.add('hint-target'); setStatus('Wrong here. Hint shown.'); }
+                else { setStatus('Wrong here.'); }
+            } else {
+                setStatus('That value is incorrect.');
+                cellAt(i).classList.add('error');
+            }
+        }
+
+        function pushHistory() {
+            state.history.push({
+                cells: [...state.cells],
+                pencils: deepClonePencils(state.pencils)
+            });
+            if (state.history.length > 200) state.history.shift();
+        }
+        function undo() {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (!state.history.length) return;
+            state.future.push({
+                cells: [...state.cells],
+                pencils: deepClonePencils(state.pencils)
+            });
+            const prevState = state.history.pop();
+            state.cells = prevState.cells;
+            state.pencils = prevState.pencils;
+            refreshBoardState();
+            setStatus('Undo.');
+        }
+        function redo() {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (!state.future.length) return;
+            state.history.push({
+                cells: [...state.cells],
+                pencils: deepClonePencils(state.pencils)
+            });
+            const nextState = state.future.pop();
+            state.cells = nextState.cells;
+            state.pencils = nextState.pencils;
+            refreshBoardState();
+            setStatus('Redo.');
+        }
+        function refreshBoardState() {
+            for (let i = 0; i < 81; i++) {
+                const cellEl = cellAt(i);
+                cellEl.textContent = state.cells[i] === 0 ? '' : state.cells[i];
+                renderPencils(cellEl, i);
+            }
+            clearFeedback();
+            paintSelection(); // Repaint selection highlights
+        }
+        function updateWrongMovesDisplay() {
+            const el = $('#wrong-moves');
+            if (!el) return;
+
+            // Use the infinity symbol '∞' if the limit is Infinity, otherwise use the number
+            const limitDisplay = (state.wrongMovesLimit === Infinity) ? '∞' : state.wrongMovesLimit;
+
+            // Always display in the "X / Y" format
+            el.textContent = `Mistakes: ${state.wrongMoves} / ${limitDisplay}`;
+        }
+
+
+        /* Place with toggle: pressing the same number again clears the cell */
+        function place(n) {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (state.sel == null) { setStatus('Tap a cell first.'); return; }
+            const i = state.sel;
+            if (state.givens[i] !== 0) { setStatus('Given cell cannot be changed.'); return; }
+
+            // toggle-off behavior
+            if (state.cells[i] === n) {
+                erase();
+                return;
+            }
+
+            pushHistory();
+            state.cells[i] = n;
+            state.pencils[i].clear();
+            state.future.length = 0;
+            cellAt(i).textContent = n;
+            renderPencils(cellAt(i), i);
+            applyImmediateFeedback(i, n);
+
+            // Automatically check the puzzle on the last move in hard mode
+            const isBoardFull = !state.cells.includes(0);
+            if (isBoardFull) {
+                finish();
+            }
+        }
+
+        function erase() {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (state.sel == null) return; // Nothing selected
+            const i = state.sel;
+            if (state.givens[i] !== 0) return; // Can't erase a given number
+
+            // Check if the cell has pencil marks
+            if (state.pencils[i].size > 0) {
+                pushHistory();
+                state.pencils[i].clear();
+                state.future.length = 0;
+                renderPencils(cellAt(i), i); // Update the cell's display
+                setStatus('Pencil marks cleared.');
+
+                // If no pencil marks, check for a main number (original behavior)
+            } else if (state.cells[i] !== 0) {
+                pushHistory();
+                state.cells[i] = 0;
+                state.future.length = 0;
+                cellAt(i).textContent = '';
+                renderPencils(cellAt(i), i); // Update display to show pencils again if any existed before this state
+                clearFeedback();
+                setStatus('Cell cleared.');
+            }
+        }
+        // --- NEW: Pause and Resume Functions ---
+        function pauseGame() {
+            if (state.gameOver || state.isPaused) return;
+            state.isPaused = true;
+            $('#pause-overlay').classList.remove('hidden');
+            saveGame();;
+        }
+
+        function resumeGame() {
+            if (state.gameOver || !state.isPaused) return;
+            state.isPaused = false;
+            $('#pause-overlay').classList.add('hidden');
+        }
+
+        // --- NEW: Game Over Modal ---
+        function showGameOverModal(message) {
+            $('#game-over-message').textContent = message;
+            $('#game-over-modal').classList.remove('hidden');
+        }
+
+        // --- NEW: Save and Load Game State ---
+        function saveGame() {
+            // Convert Sets to arrays for JSON serialization
+            const serializableState = {
+                ...state,
+                pencils: state.pencils.map(s => Array.from(s))
+            };
+            localStorage.setItem('sudokuGameState', JSON.stringify(serializableState));
+        }
+
+        function loadGame() {
+            const savedStateJSON = localStorage.getItem('sudokuGameState');
+            if (!savedStateJSON) return false;
+
+            const savedState = JSON.parse(savedStateJSON);
+
+            // Restore state
+            state = {
+                ...savedState,
+                pencils: savedState.pencils.map(p => new Set(p)), // Convert arrays back to Sets
+                isPaused: false // Always start unpaused
+            };
+
+            // Re-render board and UI
+            renderBoard();
+            updateWrongMovesDisplay();
+
+            // Resume timer if game was in progress
+            if (!state.gameOver) {
+                state.timerId = setInterval(timerTick, 1000);
+            }
+
+            // If the game was over, show the modal again
+            if (state.gameOver) {
+                const message = state.wrongMoves >= state.wrongMovesLimit ?
+                    "Game Over! Too many mistakes." : "Congratulations, You Win!";
+                showGameOverModal(message);
+            }
+
+            return true; // Indicate that a game was loaded
+        }
+
+        function finish() {
+            if (state.isPaused || state.gameOver) return;
+            
+            // The auto-finish in the place() function already ensures the board is full.
+            // So we don't need to check for that here.
+
+            state.gameOver = true;
+            if (state.timerId) clearInterval(state.timerId);
+            
+            const ok = state.cells.every((v, i) => v === state.solution[i]);
+            if (ok) {
+                showGameOverModal('Congratulations, You Win! 🏆');
+            } else {
+                showGameOverModal('Almost! Some entries are wrong.');
+            }
+            saveGame();
+        }
+
+        function checkCell() {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (state.sel == null) return;
+            const i = state.sel;
+            if (state.cells[i] === 0) { setStatus('Empty cell.'); return; }
+            const ok = state.cells[i] === state.solution[i];
+            if (ok) setStatus('✅ This cell is correct.');
+            else { cellAt(i).classList.add('error'); setStatus('❌ This cell is incorrect.'); }
+        }
+        function giveHint() {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (state.sel == null) return;
+            const i = state.sel;
+            if (state.givens[i] !== 0) { setStatus('Cannot hint a given cell.'); return; }
+            if (state.cells[i] === state.solution[i]) { setStatus('Already correct.'); return; }
+            pushHistory();
+            state.cells[i] = state.solution[i];
+            state.future.length = 0;
+            cellAt(i).textContent = state.cells[i];
+            clearFeedback();
+            setStatus('Hint applied to the selected cell.');
+        }
+
+        function moveSel(dr, dc) {
+            if (state.sel == null) { state.sel = 0; paintSelection(); return; }
+            let r = Math.floor(state.sel / 9), c = state.sel % 9;
+            r = (r + dr + 9) % 9; c = (c + dc + 9) % 9;
+            state.sel = r * 9 + c; paintSelection();
+        }
+
+        // NEW function to render pencil marks inside a cell
+        function renderPencils(cellEl, i) {
+            // Clear any old pencil grid
+            const oldGrid = cellEl.querySelector('.pencil-grid');
+            if (oldGrid) oldGrid.remove();
+
+            // Don't show pencils if a final number is placed
+            if (state.cells[i] !== 0) return;
+
+            const marks = state.pencils[i];
+            if (marks.size === 0) return;
+
+            const grid = document.createElement('div');
+            grid.className = 'pencil-grid';
+            for (let n = 1; n <= 9; n++) {
+                const span = document.createElement('span');
+                if (marks.has(n)) {
+                    span.textContent = n;
+                }
+                grid.appendChild(span);
+            }
+            cellEl.appendChild(grid);
+        }
+
+        // NEW helper function for undo/redo
+        function deepClonePencils(pencils) {
+            return pencils.map(s => new Set(s));
+        }
+
+        function pencil(n) {
+            if (state.isPaused) return;
+            if (state.gameOver) return;
+            if (state.sel == null) { setStatus('Select a cell first.'); return; }
+            const i = state.sel;
+            if (state.givens[i] !== 0) { setStatus('Cannot pencil a given cell.'); return; }
+            if (state.cells[i] !== 0) { setStatus('Clear the number before adding pencil marks.'); return; }
+
+            pushHistory(); // Save state before changing
+
+            if (state.pencils[i].has(n)) {
+                state.pencils[i].delete(n);
+                setStatus(`Pencil mark ${n} removed.`);
+            } else {
+                state.pencils[i].add(n);
+                setStatus(`Pencil mark ${n} added.`);
+            }
+            state.future.length = 0; // Clear redo history
+
+            // Re-render the pencils for the current cell
+            renderPencils(cellAt(i), i);
+        }
+
+        // This function will run every second to update the timer display
+        function timerTick() {
+            if (state.isPaused || state.gameOver) return;
+
+            state.elapsedSeconds++;
+            const minutes = Math.floor(state.elapsedSeconds / 60);
+            const seconds = state.elapsedSeconds % 60;
+
+            // Format to MM:SS and update the HTML
+            const timerEl = $('#timer');
+            if (timerEl) {
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+
+        function movesCount() {
+            // Future use: implement move counting if needed
+        }
+
+        /* --- UI bindings --- */
+        /* --- UI bindings --- */
+        // A single, reliable event listener for all buttons
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('button');
+            if (!target) return;
+
+            const id = target.id;
+            console.log(`Button clicked! ID: "${id}"`);
+
+
+            const isNumPad = target.closest('#pad') && target.dataset.num;
+
+            if (isNumPad) {
+                if (state.pencilMode) {
+                    pencil(+target.dataset.num);
+                } else {
+                    place(+target.dataset.num);
+                }
+                return;
+            }
+
+            // Call the correct function based on the button's ID
+            switch (id) {
+                case 'new':
+                case 'new-game-modal-btn':
+                    localStorage.removeItem('sudokuGameState');
+                    $('#game-over-modal').classList.add('hidden');
+                    loadPuzzle(state.mode);
+                    break;
+                case 'finish-btn':
+                    finish();
+                    break;
+                case 'pause-btn':
+                    pauseGame();
+                    break;
+                case 'resume-btn':
+                    resumeGame();
+                    break;
+                case 'clear':
+                    erase();
+                    break;
+                case 'check':
+                    checkCell();
+                    break;
+                case 'hint':
+                    giveHint();
+                    break;
+                case 'undo':
+                    undo();
+                    break;
+                case 'pencil':
+                    state.pencilMode = !state.pencilMode;
+                    target.classList.toggle('active', state.pencilMode);
+                    setStatus(state.pencilMode ? 'Pencil mode is ON' : 'Pencil mode is OFF');
+                    break;
+            }
+        });
+
+        // Listener for the difficulty dropdown
+        $('#mode').addEventListener('change', e => {
+            localStorage.removeItem('sudokuGameState');
+            loadPuzzle(e.target.value);
+        });
+
+
+        function setStatus(msg) { $('#status').textContent = msg || '' }
+
+        // --- Final Game Load ---
+        if (!loadGame()) {
+            loadPuzzle('beginner');
+        }
+
+    </script>
+    </script>
+</body>
+</html>
