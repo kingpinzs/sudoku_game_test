@@ -242,6 +242,12 @@
             /* Draws the outline inside the cell bounds */
         }
 
+        .cell.number-match {
+            background: color-mix(in oklab, var(--accent-2) 25%, transparent);
+            outline: 1px solid var(--accent-2);
+            outline-offset: -1px;
+        }
+
         /* --- CSS for Pencil Functionality --- */
 
         /* Make cell a positioning container for the pencil grid */
@@ -778,19 +784,37 @@ button:not(:disabled):active {
 
         function paintSelection() {
             $$('.cell', gridEl).forEach(el => {
-                el.classList.remove('selected', 'hilite', 'dup', 'hint-target', 'error');
+                el.classList.remove('selected', 'hilite', 'dup', 'hint-target', 'error', 'number-match');
             });
             if (state.sel == null) return;
             const r = Math.floor(state.sel / 9), c = state.sel % 9;
 
             if (state.mode === 'beginner' || state.mode === 'easy') {
+                // Highlight row
                 for (let cc = 0; cc < 9; cc++) $cell(r, cc).classList.add('hilite');
             }
             if (state.mode === 'beginner') {
+                // Highlight column
+                for (let rr = 0; rr < 9; rr++) $cell(rr, c).classList.add('hilite');
+                // Highlight 3x3 box
                 const br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
                 for (let rr = br; rr < br + 3; rr++) for (let cc = bc; cc < bc + 3; cc++) $cell(rr, cc).classList.add('hilite');
             }
             $cell(r, c).classList.add('selected');
+        }
+
+        function highlightMatchingNumbers(num) {
+            // Clear previous number highlights
+            $$('.cell', gridEl).forEach(el => el.classList.remove('number-match'));
+            
+            if (state.mode !== 'beginner') return;
+            
+            // Highlight all cells that contain the same number
+            for (let i = 0; i < 81; i++) {
+                if (state.cells[i] === num) {
+                    cellAt(i).classList.add('number-match');
+                }
+            }
         }
 
         function duplicatesFor(i, val) {
@@ -1174,10 +1198,17 @@ button:not(:disabled):active {
             const isNumPad = target.closest('#pad') && target.dataset.num;
 
             if (isNumPad) {
+                const clickedNumber = +target.dataset.num;
+                
+                // In beginner mode, highlight matching numbers when clicking number buttons
+                if (state.mode === 'beginner') {
+                    highlightMatchingNumbers(clickedNumber);
+                }
+                
                 if (state.pencilMode) {
-                    pencil(+target.dataset.num);
+                    pencil(clickedNumber);
                 } else {
-                    place(+target.dataset.num);
+                    place(clickedNumber);
                 }
                 return;
             }
