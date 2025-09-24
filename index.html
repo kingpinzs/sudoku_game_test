@@ -300,6 +300,33 @@
             }
         }
 
+        /* Completion animation - vibrate effect */
+        @keyframes vibrate {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-2px); }
+            20% { transform: translateX(2px); }
+            30% { transform: translateX(-2px); }
+            40% { transform: translateX(2px); }
+            50% { transform: translateX(-1px); }
+            60% { transform: translateX(1px); }
+            70% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
+            90% { transform: translateX(0); }
+        }
+
+        /* Completion animation class */
+        .cell.completed {
+            animation: vibrate 0.8s ease-in-out;
+        }
+
+        /* Read-only/locked styling for completed series */
+        .cell.locked {
+            background: color-mix(in oklab, var(--ok) 8%, transparent);
+            color: var(--ok);
+            opacity: 0.9;
+            border: 1px solid color-mix(in oklab, var(--ok) 20%, transparent);
+        }
+
         /* === KEYPAD (high contrast) === */
         .pad {
             background: var(--panel);
@@ -944,6 +971,110 @@ button:not(:disabled):active {
             el.textContent = `Mistakes: ${state.wrongMoves} / ${limitDisplay}`;
         }
 
+        /* === COMPLETION CHECKING FUNCTIONS === */
+        
+        // Check if a row is complete and correct
+        function isRowComplete(row) {
+            const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const rowValues = [];
+            for (let c = 0; c < 9; c++) {
+                const i = row * 9 + c;
+                if (state.cells[i] === 0) return false; // Not complete
+                rowValues.push(state.cells[i]);
+            }
+            rowValues.sort((a, b) => a - b);
+            return JSON.stringify(rowValues) === JSON.stringify(expected);
+        }
+
+        // Check if a column is complete and correct
+        function isColumnComplete(col) {
+            const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const colValues = [];
+            for (let r = 0; r < 9; r++) {
+                const i = r * 9 + col;
+                if (state.cells[i] === 0) return false; // Not complete
+                colValues.push(state.cells[i]);
+            }
+            colValues.sort((a, b) => a - b);
+            return JSON.stringify(colValues) === JSON.stringify(expected);
+        }
+
+        // Check if a 3x3 section is complete and correct
+        function isSectionComplete(row, col) {
+            const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            const sectionValues = [];
+            const startRow = Math.floor(row / 3) * 3;
+            const startCol = Math.floor(col / 3) * 3;
+            
+            for (let r = startRow; r < startRow + 3; r++) {
+                for (let c = startCol; c < startCol + 3; c++) {
+                    const i = r * 9 + c;
+                    if (state.cells[i] === 0) return false; // Not complete
+                    sectionValues.push(state.cells[i]);
+                }
+            }
+            sectionValues.sort((a, b) => a - b);
+            return JSON.stringify(sectionValues) === JSON.stringify(expected);
+        }
+
+        // Apply completion animations and styling
+        function markCompletedSeries(cellRow, cellCol) {
+            const completedSeries = []; // Track what got completed for status message
+            
+            // Check and mark completed row
+            if (isRowComplete(cellRow)) {
+                for (let c = 0; c < 9; c++) {
+                    const cellEl = $cell(cellRow, c);
+                    cellEl.classList.add('completed');
+                    // After animation ends, add locked styling
+                    setTimeout(() => {
+                        cellEl.classList.remove('completed');
+                        cellEl.classList.add('locked');
+                    }, 800);
+                }
+                completedSeries.push('row');
+            }
+
+            // Check and mark completed column
+            if (isColumnComplete(cellCol)) {
+                for (let r = 0; r < 9; r++) {
+                    const cellEl = $cell(r, cellCol);
+                    cellEl.classList.add('completed');
+                    // After animation ends, add locked styling
+                    setTimeout(() => {
+                        cellEl.classList.remove('completed');
+                        cellEl.classList.add('locked');
+                    }, 800);
+                }
+                completedSeries.push('column');
+            }
+
+            // Check and mark completed 3x3 section
+            if (isSectionComplete(cellRow, cellCol)) {
+                const startRow = Math.floor(cellRow / 3) * 3;
+                const startCol = Math.floor(cellCol / 3) * 3;
+                
+                for (let r = startRow; r < startRow + 3; r++) {
+                    for (let c = startCol; c < startCol + 3; c++) {
+                        const cellEl = $cell(r, c);
+                        cellEl.classList.add('completed');
+                        // After animation ends, add locked styling
+                        setTimeout(() => {
+                            cellEl.classList.remove('completed');
+                            cellEl.classList.add('locked');
+                        }, 800);
+                    }
+                }
+                completedSeries.push('section');
+            }
+
+            // Update status message if any series were completed
+            if (completedSeries.length > 0) {
+                const seriesText = completedSeries.join(' and ');
+                setStatus(`🎉 Completed ${seriesText}!`);
+            }
+        }
+
 
         /* Place with toggle: pressing the same number again clears the cell */
         function place(n) {
@@ -966,6 +1097,11 @@ button:not(:disabled):active {
             cellAt(i).textContent = n;
             renderPencils(cellAt(i), i);
             applyImmediateFeedback(i, n);
+
+            // Check for completed series (row, column, section) and animate them
+            const cellRow = Math.floor(i / 9);
+            const cellCol = i % 9;
+            markCompletedSeries(cellRow, cellCol);
 
             // Automatically check the puzzle on the last move in hard mode
             const isBoardFull = !state.cells.includes(0);
