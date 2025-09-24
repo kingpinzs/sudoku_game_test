@@ -827,13 +827,20 @@ button:not(:disabled):active {
                 for (let rr = br; rr < br + 3; rr++) for (let cc = bc; cc < bc + 3; cc++) $cell(rr, cc).classList.add('hilite');
             }
             $cell(r, c).classList.add('selected');
+            
+            // Highlight matching numbers when selecting a cell that contains a number
+            const selectedCellValue = state.cells[state.sel];
+            if (selectedCellValue !== 0) {
+                highlightMatchingNumbers(selectedCellValue);
+            }
         }
 
         function highlightMatchingNumbers(num) {
             // Clear previous number highlights
             $$('.cell', gridEl).forEach(el => el.classList.remove('number-match'));
             
-            if (state.mode !== 'beginner') return;
+            // Only highlight if num is valid (1-9)
+            if (!num || num < 1 || num > 9) return;
             
             // Highlight all cells that contain the same number
             for (let i = 0; i < 81; i++) {
@@ -1098,6 +1105,9 @@ button:not(:disabled):active {
             renderPencils(cellAt(i), i);
             applyImmediateFeedback(i, n);
 
+            // Highlight matching numbers after placing a number
+            highlightMatchingNumbers(n);
+
             // Check for completed series (row, column, section) and animate them
             const cellRow = Math.floor(i / 9);
             const cellCol = i % 9;
@@ -1134,6 +1144,9 @@ button:not(:disabled):active {
                 renderPencils(cellAt(i), i); // Update display to show pencils again if any existed before this state
                 clearFeedback();
                 setStatus('Cell cleared.');
+                
+                // Clear number highlights when erasing a number
+                highlightMatchingNumbers(0);
             }
         }
         // --- NEW: Pause and Resume Functions ---
@@ -1335,10 +1348,8 @@ button:not(:disabled):active {
             if (isNumPad) {
                 const clickedNumber = +target.dataset.num;
                 
-                // In beginner mode, highlight matching numbers when clicking number buttons
-                if (state.mode === 'beginner') {
-                    highlightMatchingNumbers(clickedNumber);
-                }
+                // Highlight matching numbers when clicking number buttons (all modes)
+                highlightMatchingNumbers(clickedNumber);
                 
                 if (state.pencilMode) {
                     pencil(clickedNumber);
