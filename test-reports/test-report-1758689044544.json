@@ -1,0 +1,455 @@
+{
+  "timestamp": "2025-09-24T04:44:04.291Z",
+  "totalTests": 68,
+  "passedTests": 68,
+  "failedTests": 0,
+  "warnings": 0,
+  "details": {
+    "structure": {
+      "passed": [
+        "beginner: 15 puzzles ✓",
+        "easy: 15 puzzles ✓",
+        "medium: 15 puzzles ✓",
+        "hard: 15 puzzles ✓"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-1": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-2": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-3": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-4": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-5": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-6": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-7": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-8": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-9": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-10": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-11": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-12": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-13": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-14": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "beginner-15": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-1": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-2": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-3": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-4": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-5": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-6": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-7": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-8": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-9": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-10": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-11": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-12": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-13": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-14": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "easy-15": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-1": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-2": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-3": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-4": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-5": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-6": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-7": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-8": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-9": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-10": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-11": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-12": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-13": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-14": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "medium-15": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-1": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-2": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-3": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-4": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-5": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-6": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-7": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-8": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-9": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-10": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-11": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-12": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-13": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-14": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "hard-15": {
+      "passed": [
+        "Valid puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "progression": {
+      "passed": [
+        "beginner → easy: difficulty increases ✓",
+        "easy → medium: difficulty increases ✓",
+        "medium → hard: difficulty increases ✓"
+      ],
+      "failed": [],
+      "warnings": []
+    },
+    "performance": {
+      "passed": [
+        "Good validation speed: 0.05ms per puzzle"
+      ],
+      "failed": [],
+      "warnings": []
+    }
+  }
+}
