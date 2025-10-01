@@ -74,7 +74,8 @@
             justify-content: center;
             padding: 8px;
             min-height: 100vh;
-            min-height: 100dvh; /* Use dynamic viewport height when available */
+            min-height: 100dvh;
+            /* Use dynamic viewport height when available */
         }
 
         .app {
@@ -95,7 +96,8 @@
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            min-height: 44px; /* Ensure touch-friendly height */
+            min-height: 44px;
+            /* Ensure touch-friendly height */
         }
 
         header .left,
@@ -116,6 +118,10 @@
             background: #f3f6ff;
             color: var(--text);
             box-shadow: inset 0 0 0 1px var(--grid-line);
+        }
+
+        .util-buttons {
+            justify-content: center;
         }
 
         select {
@@ -302,16 +308,47 @@
 
         /* Completion animation - vibrate effect */
         @keyframes vibrate {
-            0%, 100% { transform: translateX(0); }
-            10% { transform: translateX(-2px); }
-            20% { transform: translateX(2px); }
-            30% { transform: translateX(-2px); }
-            40% { transform: translateX(2px); }
-            50% { transform: translateX(-1px); }
-            60% { transform: translateX(1px); }
-            70% { transform: translateX(-1px); }
-            80% { transform: translateX(1px); }
-            90% { transform: translateX(0); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10% {
+                transform: translateX(-2px);
+            }
+
+            20% {
+                transform: translateX(2px);
+            }
+
+            30% {
+                transform: translateX(-2px);
+            }
+
+            40% {
+                transform: translateX(2px);
+            }
+
+            50% {
+                transform: translateX(-1px);
+            }
+
+            60% {
+                transform: translateX(1px);
+            }
+
+            70% {
+                transform: translateX(-1px);
+            }
+
+            80% {
+                transform: translateX(1px);
+            }
+
+            90% {
+                transform: translateX(0);
+            }
         }
 
         /* Completion animation class */
@@ -418,6 +455,7 @@
         .game-stats {
             display: flex;
             gap: 15px;
+            justify-content: center;
         }
 
         /* --- Visual Polish & New Feature CSS --- */
@@ -463,17 +501,20 @@
         }
 
 
-/* Style for when you hover over any clickable button */
-button:not(:disabled):hover {
-  cursor: pointer;
-  filter: brightness(110%); /* Makes the button slightly brighter */
-}
+        /* Style for when you hover over any clickable button */
+        button:not(:disabled):hover {
+            cursor: pointer;
+            filter: brightness(110%);
+            /* Makes the button slightly brighter */
+        }
 
-/* Style for when you are actively pressing down on any clickable button */
-button:not(:disabled):active {
-  transform: translateY(1px); /* Gives a "push down" effect */
-  filter: brightness(90%);   /* Makes the button slightly darker */
-}
+        /* Style for when you are actively pressing down on any clickable button */
+        button:not(:disabled):active {
+            transform: translateY(1px);
+            /* Gives a "push down" effect */
+            filter: brightness(90%);
+            /* Makes the button slightly darker */
+        }
 
         /* Mobile-specific optimizations */
         @media (max-width: 759px) {
@@ -481,40 +522,40 @@ button:not(:disabled):active {
                 padding: 4px;
                 align-items: flex-start;
             }
-            
+
             .app {
                 gap: 6px;
                 width: 100%;
                 max-width: calc(100vw - 8px);
             }
-            
+
             header {
                 padding: 6px 8px;
                 gap: 6px;
             }
-            
+
             .board {
                 padding: 8px;
             }
-            
+
             .grid-wrap {
                 gap: 8px;
             }
-            
+
             .pad {
                 padding: 8px;
                 gap: 6px;
             }
-            
+
             .app .util-buttons {
                 gap: 6px;
             }
-            
+
             /* Ensure buttons don't overflow */
             select {
                 min-width: 120px;
             }
-            
+
             button {
                 padding: 8px 10px;
                 font-size: 14px;
@@ -527,65 +568,71 @@ button:not(:disabled):active {
                 padding: 2px;
                 box-sizing: border-box;
             }
-            
+
             .app {
                 gap: 4px;
                 max-width: calc(100vw - 4px);
                 box-sizing: border-box;
             }
-            
+
             header {
                 padding: 4px 6px;
                 gap: 4px;
                 box-sizing: border-box;
             }
-            
+
             .board {
                 padding: 6px;
                 box-sizing: border-box;
-                min-width: 0; /* Allow shrinking */
+                min-width: 0;
+                /* Allow shrinking */
             }
-            
+
             .grid {
-                min-width: 0; /* Allow shrinking */
+                min-width: 0;
+                /* Allow shrinking */
             }
-            
+
             .pad {
                 padding: 6px;
                 gap: 4px;
                 box-sizing: border-box;
-                min-width: 0; /* Allow shrinking */
+                min-width: 0;
+                /* Allow shrinking */
             }
-            
+
             .grid-wrap {
                 gap: 6px;
-                min-width: 0; /* Allow shrinking */
+                min-width: 0;
+                /* Allow shrinking */
             }
-            
+
             .util-buttons {
                 gap: 4px !important;
                 flex-wrap: wrap;
             }
-            
+
             select {
                 min-width: 100px;
                 font-size: 13px;
                 max-width: 100%;
                 box-sizing: border-box;
             }
-            
+
             button {
                 padding: 6px 8px;
                 font-size: 13px;
                 box-sizing: border-box;
-                min-width: 0; /* Allow shrinking */
+                min-width: 0;
+                /* Allow shrinking */
             }
-            
+
             .cell {
                 font-size: clamp(12px, 4vw, 20px);
-                min-width: 0; /* Allow shrinking */
+                min-width: 0;
+                /* Allow shrinking */
             }
-            
+
             /* Constrain main layout containers to respect container width */
             .app,
             .board,
@@ -611,7 +658,8 @@ button:not(:disabled):active {
 
             .board {
                 max-width: 500px;
-                margin-inline: auto
+                margin-inline: auto;
+                width: 100%
             }
 
             .pad {
@@ -660,13 +708,6 @@ button:not(:disabled):active {
             <div class="board" id="board" aria-label="Sudoku board">
                 <div class="grid" id="grid" role="grid" aria-rowcount="9" aria-colcount="9"></div>
             </div>
-            <div class="legend">
-                <span><span class="dot sel"></span>Selected</span>
-                <span><span class="dot hi"></span>Row/Box highlight</span>
-                <span><span class="dot dup"></span>Duplicate warning</span>
-                <span><span class="dot hint"></span>Beginner: correct location hint</span>
-                <span>Tip: tap the same number again to <strong>clear</strong>, or use <strong>Clear ⌫</strong>.</span>
-            </div>
             <div class="util-buttons" style="display:flex;gap:8px;">
                 <button class="action utils" id="check">Check Cell</button>
                 <button class="action utils" id="hint">Hint</button>
@@ -689,7 +730,13 @@ button:not(:disabled):active {
                 <button class="action clear" id="clear">Clear ⌫</button>
             </div>
         </div>
-
+        <div class="legend">
+            <span><span class="dot sel"></span>Selected</span>
+            <span><span class="dot hi"></span>Row/Box highlight</span>
+            <span><span class="dot dup"></span>Duplicate warning</span>
+            <span><span class="dot hint"></span>Beginner: correct location hint</span>
+            <span>Tip: tap the same number again to <strong>clear</strong>, or use <strong>Clear ⌫</strong>.</span>
+        </div>
     </div>
     <div id="pause-overlay" class="modal-overlay hidden">
         <div class="modal-content">
@@ -828,7 +875,7 @@ button:not(:disabled):active {
                 for (let rr = br; rr < br + 3; rr++) for (let cc = bc; cc < bc + 3; cc++) $cell(rr, cc).classList.add('hilite');
             }
             $cell(r, c).classList.add('selected');
-            
+
             // Highlight matching numbers when selecting a cell that contains a number
             const selectedCellValue = state.cells[state.sel];
             if (selectedCellValue !== 0) {
@@ -839,10 +886,10 @@ button:not(:disabled):active {
         function highlightMatchingNumbers(num) {
             // Clear previous number highlights
             $$('.cell', gridEl).forEach(el => el.classList.remove('number-match'));
-            
+
             // Only highlight if num is valid (1-9)
             if (!num || num < 1 || num > 9) return;
-            
+
             // Highlight all cells that contain the same number
             for (let i = 0; i < 81; i++) {
                 if (state.cells[i] === num) {
@@ -980,7 +1027,7 @@ button:not(:disabled):active {
         }
 
         /* === COMPLETION CHECKING FUNCTIONS === */
-        
+
         // Check if a row is complete and correct
         function isRowComplete(row) {
             const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -1013,7 +1060,7 @@ button:not(:disabled):active {
             const sectionValues = [];
             const startRow = Math.floor(row / 3) * 3;
             const startCol = Math.floor(col / 3) * 3;
-            
+
             for (let r = startRow; r < startRow + 3; r++) {
                 for (let c = startCol; c < startCol + 3; c++) {
                     const i = r * 9 + c;
@@ -1028,7 +1075,7 @@ button:not(:disabled):active {
         // Apply completion animations and styling
         function markCompletedSeries(cellRow, cellCol) {
             const completedSeries = []; // Track what got completed for status message
-            
+
             // Check and mark completed row
             if (isRowComplete(cellRow)) {
                 for (let c = 0; c < 9; c++) {
@@ -1061,7 +1108,7 @@ button:not(:disabled):active {
             if (isSectionComplete(cellRow, cellCol)) {
                 const startRow = Math.floor(cellRow / 3) * 3;
                 const startCol = Math.floor(cellCol / 3) * 3;
-                
+
                 for (let r = startRow; r < startRow + 3; r++) {
                     for (let c = startCol; c < startCol + 3; c++) {
                         const cellEl = $cell(r, c);
@@ -1145,7 +1192,7 @@ button:not(:disabled):active {
                 renderPencils(cellAt(i), i); // Update display to show pencils again if any existed before this state
                 clearFeedback();
                 setStatus('Cell cleared.');
-                
+
                 // Clear number highlights when erasing a number
                 highlightMatchingNumbers(0);
             }
@@ -1214,13 +1261,13 @@ button:not(:disabled):active {
 
         function finish() {
             if (state.isPaused || state.gameOver) return;
-            
+
             // The auto-finish in the place() function already ensures the board is full.
             // So we don't need to check for that here.
 
             state.gameOver = true;
             if (state.timerId) clearInterval(state.timerId);
-            
+
             const ok = state.cells.every((v, i) => v === state.solution[i]);
             if (ok) {
                 showGameOverModal('Congratulations, You Win! 🏆');
@@ -1348,10 +1395,10 @@ button:not(:disabled):active {
 
             if (isNumPad) {
                 const clickedNumber = +target.dataset.num;
-                
+
                 // Highlight matching numbers when clicking number buttons (all modes)
                 highlightMatchingNumbers(clickedNumber);
-                
+
                 if (state.pencilMode) {
                     pencil(clickedNumber);
                 } else {
