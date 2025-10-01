@@ -750,11 +750,18 @@
             <button id="new-game-modal-btn" class="primary">New Game</button>
         </div>
     </div>
-    <script src="puzzles.js"></script>
+    <script src="sudoku-gen.js"></script>
     <script>
         const $ = (sel, root = document) => root.querySelector(sel);
         const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+        const MODE_TO_TARGET = {
+            beginner: 'easy',
+            easy: 'easy',
+            medium: 'medium',
+            hard: 'hard'
+            // or: 'hard': { minClues: 24, maxClues: 32, techniques: { NS:true, HS:true, NP:true, HP:true, PC:true } }
+        };
 
         let state = {
             mode: 'beginner',
@@ -780,9 +787,15 @@
         function loadPuzzle(mode) {
             if (state.timerId) clearInterval(state.timerId);
             state.mode = mode;
-            const pick = PUZZLES[mode][Math.floor(Math.random() * PUZZLES[mode].length)];
-            state.givens = pick.givens.split('').map(n => +n);
-            state.solution = pick.solution.split('').map(n => +n);
+            const target = MODE_TO_TARGET[mode] || 'medium';
+            const { givens, solution } = generatePuzzle({
+                target,
+                symmetry: 'rotate',   // 'none' | 'rotate' | 'mirror' (optional)
+                seed: Date.now()      // pass a fixed number to make it reproducible
+            });
+
+            state.givens = givens.split('').map(Number);    // zeros for blanks
+            state.solution = solution.split('').map(Number); // full solved key
             state.cells = [...state.givens];
             state.pencils = Array.from({ length: 81 }, () => new Set());
             state.sel = null;
