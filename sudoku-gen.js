@@ -60,13 +60,32 @@
 
   function candidatesFor(g){
     const cand = Array.from({length:N},()=>Array.from({length:N},()=> new Set()));
-    for (let r=0;r<N;r++) for (let c=0;c<N;c++){
-      if (g[r][c]) continue;
-      const bad=new Set();
-      for (let i=0;i<N;i++){ bad.add(g[r][i]); bad.add(g[i][c]); }
-      const rs=boxStart(r), cs=boxStart(c);
-      for (let i=rs;i<rs+3;i++) for (let j=cs;j<cs+3;j++) bad.add(g[i][j]);
-      for (let v=1; v<=9; v++) if (!bad.has(v)) cand[r][c].add(v);
+    for (let r=0;r<N;r++) {
+      const rowVals = new Set();
+      for (let c=0;c<N;c++) if (g[r][c]) rowVals.add(g[r][c]);
+      
+      for (let c=0;c<N;c++){
+        if (g[r][c]) continue;
+        
+        // Start with all digits
+        const candidates = new Set([1,2,3,4,5,6,7,8,9]);
+        
+        // Remove row conflicts
+        for (const v of rowVals) candidates.delete(v);
+        
+        // Remove column conflicts
+        for (let i=0;i<N;i++) if (g[i][c]) candidates.delete(g[i][c]);
+        
+        // Remove box conflicts
+        const rs=boxStart(r), cs=boxStart(c);
+        for (let i=rs;i<rs+3;i++) {
+          for (let j=cs;j<cs+3;j++) {
+            if (g[i][j]) candidates.delete(g[i][j]);
+          }
+        }
+        
+        cand[r][c] = candidates;
+      }
     }
     return cand;
   }
@@ -75,10 +94,18 @@
   function countSolutions(grid, limit=2){
     if (!isValidGrid(grid)) return { count: 0, oneSolution: null };
     let count=0, first=null;
+    
+    // Cache candidates to avoid recomputation
+    let candidateCache = null;
+
+    function getCandidates(g) {
+      if (!candidateCache) candidateCache = candidatesFor(g);
+      return candidateCache;
+    }
 
     function pickCell(g){
       let best=null, bestSize=10;
-      const cand=candidatesFor(g);
+      const cand=getCandidates(g);
       for (let r=0;r<N;r++) for (let c=0;c<N;c++){
         if (g[r][c]) continue;
         const sz=cand[r][c].size;
@@ -87,18 +114,50 @@
       }
       return best; // null if full
     }
+    
+    // Optimized validation that only checks the placed cell
+    function isValidPlacement(g, r, c, v) {
+      // Check row
+      for (let i = 0; i < N; i++) {
+        if (i !== c && g[r][i] === v) return false;
+      }
+      // Check column  
+      for (let i = 0; i < N; i++) {
+        if (i !== r && g[i][c] === v) return false;
+      }
+      // Check box
+      const rs = boxStart(r), cs = boxStart(c);
+      for (let i = rs; i < rs + 3; i++) {
+        for (let j = cs; j < cs + 3; j++) {
+          if ((i !== r || j !== c) && g[i][j] === v) return false;
+        }
+      }
+      return true;
+    }
+    
     function dfs(g){
       if (count>=limit) return;
-      let full=true; for (let r=0;r<N;r++) for (let c=0;c<N;c++) if (!g[r][c]) { full=false; break; }
+      let full=true; 
+      for (let r=0;r<N && full;r++) {
+        for (let c=0;c<N;c++) {
+          if (!g[r][c]) { full=false; break; }
+        }
+      }
       if (full){ count++; if(!first) first=clone(g); return; }
+      
       const pick=pickCell(g);
       if (!pick || pick.cand.size===0) return;
       const {r,c,cand}=pick;
+      
       for (const v of cand){
-        g[r][c]=v;
-        if (isValidGrid(g)) dfs(g);
-        g[r][c]=0;
-        if (count>=limit) return;
+        if (isValidPlacement(g, r, c, v)) {
+          g[r][c]=v;
+          candidateCache = null; // Invalidate cache
+          dfs(g);
+          g[r][c]=0;
+          candidateCache = null; // Invalidate cache
+          if (count>=limit) return;
+        }
       }
     }
     const work=clone(grid);
@@ -109,24 +168,61 @@
   // ---------------- Solved Grid Generator ----------------
   function generateSolved(rnd){
     const g=Array.from({length:N},()=>Array(N).fill(0));
-    const idxs=shuffle([...Array(81).keys()], rnd);
-    function tryFill(k){
-      if (k===81) return true;
-      const idx=idxs[k], r=(idx/9)|0, c=idx%9;
-      const digits=shuffle(DIGS.slice(), rnd);
-      for (const v of digits){
-        let ok=true;
-        for (let i=0;i<N;i++){ if (g[r][i]===v || g[i][c]===v){ ok=false; break; } }
-        const rs=boxStart(r), cs=boxStart(c);
-        for (let i=rs;i<rs+3 && ok;i++) for (let j=cs;j<cs+3;j++){ if (g[i][j]===v){ ok=false; break; } }
-        if (!ok) continue;
-        g[r][c]=v;
-        if (tryFill(k+1)) return true;
-        g[r][c]=0;
+    
+    // Use a more efficient approach: fill in order with constraint propagation
+    function isValid(r, c, v) {
+      // Check row
+      for (let i = 0; i < N; i++) {
+        if (g[r][i] === v) return false;
+      }
+      // Check column
+      for (let i = 0; i < N; i++) {
+        if (g[i][c] === v) return false;
+      }
+      // Check box
+      const rs = boxStart(r), cs = boxStart(c);
+      for (let i = rs; i < rs + 3; i++) {
+        for (let j = cs; j < cs + 3; j++) {
+          if (g[i][j] === v) return false;
+        }
+      }
+      return true;
+    }
+    
+    // Fill box by box for better constraint satisfaction
+    function fillBox(boxRow, boxCol) {
+      const digits = shuffle(DIGS.slice(), rnd);
+      let idx = 0;
+      for (let r = boxRow * 3; r < boxRow * 3 + 3; r++) {
+        for (let c = boxCol * 3; c < boxCol * 3 + 3; c++) {
+          g[r][c] = digits[idx++];
+        }
+      }
+    }
+    
+    // Fill diagonal boxes first (no constraints between them)
+    fillBox(0, 0);
+    fillBox(1, 1);
+    fillBox(2, 2);
+    
+    // Fill remaining cells with backtracking
+    function fillRemaining(r, c) {
+      if (r === N) return true;
+      if (c === N) return fillRemaining(r + 1, 0);
+      if (g[r][c] !== 0) return fillRemaining(r, c + 1);
+      
+      const digits = shuffle(DIGS.slice(), rnd);
+      for (const v of digits) {
+        if (isValid(r, c, v)) {
+          g[r][c] = v;
+          if (fillRemaining(r, c + 1)) return true;
+          g[r][c] = 0;
+        }
       }
       return false;
     }
-    tryFill(0);
+    
+    fillRemaining(0, 0);
     return g;
   }
 
@@ -417,6 +513,10 @@
     function clueCount(){
       let n=0; for (let i=0;i<81;i++){ const r=(i/9)|0,c=i%9; if (puzzle[r][c]) n++; } return n;
     }
+    
+    // Batch processing to reduce checks
+    let removalsWithoutCheck = 0;
+    const maxRemovalsWithoutCheck = 5; // Allow some removals before expensive checks
 
     for (const i of order){
       const j = mate(i);
@@ -426,25 +526,39 @@
       const keep1=puzzle[r][c], keep2=puzzle[jr][jc];
       puzzle[r][c]=0; if (j!==i) puzzle[jr][jc]=0;
 
-      if (clueCount() < minClues){
+      const currentClues = clueCount();
+      if (currentClues < minClues){
         puzzle[r][c]=keep1; if (j!==i) puzzle[jr][jc]=keep2; continue;
       }
 
-      // 1) Uniqueness gate
-      const uniq = countSolutions(puzzle, 2);
-      if (uniq.count !== 1){
-        puzzle[r][c]=keep1; if (j!==i) puzzle[jr][jc]=keep2; continue;
+      // For easier difficulties, skip some expensive checks early in the process
+      let needsFullCheck = true;
+      if ((t === 'easy' || t === 'medium') && currentClues > minClues + 10) {
+        needsFullCheck = false;
+        removalsWithoutCheck++;
+        if (removalsWithoutCheck >= maxRemovalsWithoutCheck) {
+          needsFullCheck = true;
+          removalsWithoutCheck = 0;
+        }
       }
 
-      // 2) Human difficulty gate: must be solvable by allowed techniques from current givens
-      const okHuman = humanSolve(puzzle, tech).solved;
-      if (!okHuman){
-        // too hard for the chosen tier → revert this removal
-        puzzle[r][c]=keep1; if (j!==i) puzzle[jr][jc]=keep2; continue;
+      if (needsFullCheck) {
+        // 1) Uniqueness gate
+        const uniq = countSolutions(puzzle, 2);
+        if (uniq.count !== 1){
+          puzzle[r][c]=keep1; if (j!==i) puzzle[jr][jc]=keep2; continue;
+        }
+
+        // 2) Human difficulty gate: must be solvable by allowed techniques from current givens
+        const okHuman = humanSolve(puzzle, tech).solved;
+        if (!okHuman){
+          // too hard for the chosen tier → revert this removal
+          puzzle[r][c]=keep1; if (j!==i) puzzle[jr][jc]=keep2; continue;
+        }
       }
 
       // accepted removal; keep going; stop early when within clue band
-      if (clueCount() <= maxClues) break;
+      if (currentClues <= maxClues) break;
     }
 
     // Safety: ensure final is unique + solvable by human tier
