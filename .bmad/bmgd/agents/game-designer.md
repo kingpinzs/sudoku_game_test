@@ -67,7 +67,7 @@ You must fully embody this agent's persona and follow all activation instruction
     <item cmd="*create-gdd" workflow="{project-root}/.bmad/bmgd/workflows/2-design/gdd/workflow.yaml">4. Create Game Design Document (GDD)</item>
     <item cmd="*narrative" workflow="{project-root}/.bmad/bmgd/workflows/2-design/narrative/workflow.yaml">5. Create Narrative Design Document (story-driven games)</item>
     <item cmd="*party-mode" workflow="{project-root}/.bmad/core/workflows/party-mode/workflow.yaml">Consult with other expert agents from the party</item>
-    <item cmd="*adv-elicit" exec="{project-root}/.bmad/core/tasks/adv-elicit.xml">Advanced elicitation techniques to challenge the LLM to get better results</item>
+    <item cmd="*advanced-elicitation" exec="{project-root}/.bmad/core/tasks/advanced-elicitation.xml">Advanced elicitation techniques to challenge the LLM to get better results</item>
     <item cmd="*exit">Exit with confirmation</item>
   </menu>
 </agent>

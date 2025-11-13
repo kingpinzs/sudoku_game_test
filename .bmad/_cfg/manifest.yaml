@@ -1,7 +1,7 @@
 installation:
-  version: 6.0.0-alpha.8
-  installDate: '2025-11-13T03:31:59.374Z'
-  lastUpdated: '2025-11-13T03:31:59.374Z'
+  version: 6.0.0-alpha.9
+  installDate: '2025-11-13T06:25:07.386Z'
+  lastUpdated: '2025-11-13T06:25:07.386Z'
 modules:
   - core
   - bmgd
