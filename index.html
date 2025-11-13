@@ -33,6 +33,11 @@
 
             --shadow: 0 6px 20px rgba(20, 32, 70, .10);
             --radius: 14px;
+            --bg-gradient: linear-gradient(130deg, #f7f9fe 0%, #eef3ff 55%, #fdf8ff 100%);
+            --ambient-1: rgba(19, 82, 255, 0.15);
+            --ambient-2: rgba(14, 168, 111, 0.15);
+            --ambient-3: rgba(255, 255, 255, 0.08);
+            --glow-accent: rgba(19, 82, 255, 0.35);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -56,6 +61,11 @@
                 --btn-fg: #eaf0ff;
                 --btn-border: #3a4a80;
                 --shadow: 0 10px 28px rgba(0, 0, 0, .35);
+                --bg-gradient: linear-gradient(140deg, #0f1124 0%, #11153c 55%, #1b1e3d 100%);
+                --ambient-1: rgba(93, 211, 255, 0.08);
+                --ambient-2: rgba(141, 255, 176, 0.08);
+                --ambient-3: rgba(147, 149, 255, 0.08);
+                --glow-accent: rgba(93, 211, 255, 0.35);
             }
         }
 
@@ -66,7 +76,7 @@
 
         body {
             margin: 0;
-            background: linear-gradient(180deg, var(--bg), #eef3ff 65%);
+            background: var(--bg-gradient);
             color: var(--text);
             font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
             display: flex;
@@ -76,6 +86,26 @@
             min-height: 100vh;
             min-height: 100dvh;
             /* Use dynamic viewport height when available */
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25), transparent 55%);
+            mix-blend-mode: screen;
+            opacity: .25;
+            animation: auroraFade 12s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        body::after {
+            background: radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.15), transparent 50%);
+            animation-duration: 16s;
         }
 
         .app {
@@ -84,6 +114,50 @@
             display: grid;
             gap: 8px;
             grid-template-columns: 1fr;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ambient-layer {
+            position: fixed;
+            inset: -10%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(8px);
+            opacity: 0.85;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            width: clamp(280px, 35vw, 520px);
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            opacity: 0.28;
+            animation: orbFloat 18s ease-in-out infinite;
+        }
+
+        .orb-one {
+            top: 2%;
+            left: 10%;
+            animation-duration: 22s;
+            background: radial-gradient(circle, var(--ambient-1) 0%, transparent 65%);
+        }
+
+        .orb-two {
+            bottom: 5%;
+            right: 5%;
+            animation-duration: 18s;
+            animation-delay: -5s;
+            background: radial-gradient(circle, var(--ambient-2) 0%, transparent 65%);
+        }
+
+        .orb-three {
+            top: 20%;
+            right: 35%;
+            animation-duration: 26s;
+            animation-delay: -12s;
+            background: radial-gradient(circle, var(--ambient-3) 0%, transparent 60%);
         }
 
         header {
@@ -134,6 +208,12 @@
             box-shadow: none
         }
 
+        button.secondary {
+            background: color-mix(in oklab, var(--accent) 12%, #f5f7ff);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
         button.warn {
             background: var(--warn);
             color: #1f1400
@@ -169,7 +249,7 @@
             height: 100%;
             border-radius: 10px;
             overflow: hidden;
-            background: #fff;
+            background: var(--panel);
             box-shadow: inset 0 0 0 3px var(--grid-outer);
         }
 
@@ -241,6 +321,18 @@
             animation: blink .7s ease-in-out 0s 3;
         }
 
+        .cell.wrong-flash {
+            animation: wrongPulse 0.55s ease;
+            color: var(--error) !important;
+            font-weight: 800;
+            background: color-mix(in oklab, var(--error) 35%, #fff) !important;
+            box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--error) 60%, transparent), 0 0 0 1px #fff;
+        }
+
+        .cell.wrong-section {
+            animation: wrongSection 0.6s ease;
+        }
+
         .cell.selected {
             outline: 2px solid #3b82f6;
             /* A bright blue outline */
@@ -249,9 +341,38 @@
         }
 
         .cell.number-match {
-            background: color-mix(in oklab, var(--accent-2) 25%, transparent);
-            outline: 1px solid var(--accent-2);
-            outline-offset: -1px;
+            background: color-mix(in oklab, var(--accent) 28%, #ffffff 72%);
+            color: color-mix(in oklab, var(--accent) 90%, #000);
+            box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--accent) 65%, transparent);
+            outline: none;
+        }
+
+        .cell.number-match-row {
+            background: color-mix(in oklab, #d97706 30%, transparent);
+        }
+
+        .cell.number-match-col {
+            background: color-mix(in oklab, #a21caf 35%, transparent);
+        }
+
+        .cell.row-celebrate {
+            animation: rowGlow 0.9s ease;
+        }
+
+        .cell.box-celebrate {
+            animation: boxGlow 0.9s ease;
+        }
+
+        .cell.combo-celebrate {
+            animation: comboGlow 1.1s ease;
+        }
+
+        .cell.number-celebrate {
+            animation: numberGlow 1s ease;
+        }
+
+        .board.board-celebrate {
+            animation: boardWin 1.2s ease;
         }
 
         /* --- CSS for Pencil Functionality --- */
@@ -405,6 +526,11 @@
             color: #7a0f0f;
         }
 
+        .pad button.celebrate {
+            animation: numberPulse 1.6s ease-out;
+            box-shadow: 0 0 18px color-mix(in oklab, var(--accent-2) 60%, transparent);
+        }
+
         .legend {
             color: var(--muted);
             font-size: 13px;
@@ -421,6 +547,32 @@
             display: inline-block;
             vertical-align: middle;
             margin-right: 6px
+        }
+
+        .tip-banner {
+            background: color-mix(in oklab, var(--accent) 10%, var(--panel));
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            min-height: 20px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tip-banner strong {
+            color: var(--accent);
+        }
+
+        .tip-banner #mode-pill {
+            background: color-mix(in oklab, var(--accent) 15%, transparent);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-weight: 700;
+            color: var(--accent);
         }
 
         .dot.hi {
@@ -445,17 +597,371 @@
             padding: 0 2px 6px 2px;
             min-height: 1.2em;
         }
-
         .utils {
             width: 88px;
             background: white;
             height: 50px;
         }
 
-        .game-stats {
+        .hud-lite {
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            position: relative;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .stat-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            background: color-mix(in oklab, var(--accent) 8%, var(--panel));
+            box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 10%, transparent);
+        }
+
+        .stat-chip .label {
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .stat-chip .value {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .stat-chip small {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .quick-strip {
+            display: flex;
             justify-content: center;
+            margin-top: -4px;
+        }
+
+        .quick-action {
+            flex: 1;
+            border: none;
+            border-radius: 999px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 700;
+            background: var(--panel);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .quick-action.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .quick-action.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .menu-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 11;
+        }
+
+        .menu-panel {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            width: min(280px, 90vw);
+            background: var(--panel);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .menu-panel.show {
+            display: flex;
+        }
+
+        .chip-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .chip-button {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-weight: 700;
+            background: color-mix(in oklab, var(--accent) 10%, var(--panel));
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .chip-button.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .control-fold {
+            border: none;
+            border-radius: var(--radius);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            padding: 8px 12px;
+        }
+
+        .control-fold summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .control-fold[open] summary {
+            margin-bottom: 8px;
+        }
+
+        .control-selects {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-selects label {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            color: var(--muted);
+            gap: 4px;
+        }
+
+        .control-selects select {
+            border-radius: 12px;
+            border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+            padding: 6px 10px;
+        }
+
+        .level-card {
+            background: color-mix(in oklab, var(--panel) 85%, transparent);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid color-mix(in oklab, var(--grid-line) 75%, transparent);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .level-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: color-mix(in oklab, var(--accent) 18%, transparent);
+            color: var(--text);
+        }
+
+        .level-description {
+            margin: 0;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .level-details {
+            display: grid;
+            gap: 6px;
+            margin: 6px 0 10px;
+        }
+
+        .level-detail {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--muted);
+            border-bottom: 1px dashed color-mix(in oklab, var(--grid-line) 65%, transparent);
+            padding-bottom: 4px;
+        }
+
+        .level-detail:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            color: color-mix(in oklab, var(--text) 70%, var(--muted));
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .level-meter {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: color-mix(in oklab, var(--panel) 40%, transparent);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .level-meter-fill {
+            position: absolute;
+            inset: 0;
+            width: 30%;
+            background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 90%, var(--accent-2) 30%), var(--accent));
+            border-radius: inherit;
+            box-shadow: 0 0 12px color-mix(in oklab, var(--accent) 40%, transparent);
+            transition: width 0.6s ease, opacity 0.6s ease;
+            opacity: 0.9;
+        }
+
+        .level-meter-legend {
+            display: flex;
+            justify-content: flex-start;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            gap: 10px;
+        }
+
+        .level-card summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            list-style: none;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+
+        .level-card summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .level-card-body {
+            margin-top: 6px;
+        }
+
+        .level-summary-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .level-summary-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .level-summary-progress {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .level-summary-action {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .board.board-flash {
+            animation: boardGlow 0.9s ease-out;
+        }
+
+        #confetti-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        #number-toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 3;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #number-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -5vh;
+            width: 10px;
+            height: 18px;
+            border-radius: 3px;
+            opacity: 0.95;
+            transform-origin: center;
+            animation: confettiFall var(--confetti-duration, 2s) linear forwards;
         }
 
         /* --- Visual Polish & New Feature CSS --- */
@@ -516,6 +1022,169 @@
             /* Makes the button slightly darker */
         }
 
+        @keyframes confettiFall {
+            0% {
+                transform: translate3d(0, -10vh, 0) rotate(0deg);
+                opacity: 1;
+            }
+
+            60% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate3d(var(--drift, 12vw), 110vh, 0) rotate(calc(var(--spin, 1) * 540deg));
+                opacity: 0;
+            }
+        }
+
+        @keyframes boardGlow {
+            0% {
+                box-shadow: var(--shadow), 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+
+            40% {
+                box-shadow: var(--shadow), 0 0 32px 12px var(--glow-accent);
+            }
+
+            100% {
+                box-shadow: var(--shadow), 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate3d(0, -30px, 0) scale(1.1);
+            }
+        }
+
+        @keyframes glowWash {
+            0% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes auroraFade {
+            0% {
+                opacity: 0.1;
+            }
+
+            100% {
+                opacity: 0.35;
+            }
+        }
+
+        @keyframes numberPulse {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            20% {
+                transform: translateY(-4px) scale(1.06);
+            }
+
+            60% {
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes wrongPulse {
+            0% {
+                transform: scale(1);
+                background: color-mix(in oklab, var(--error) 35%, #ffffff);
+            }
+
+            50% {
+                transform: scale(1.08);
+                background: color-mix(in oklab, var(--error) 45%, #fff0f0);
+            }
+
+            100% {
+                transform: scale(1);
+                background: color-mix(in oklab, var(--error) 20%, transparent);
+            }
+        }
+
+        @keyframes wrongSection {
+            0% {
+                background: color-mix(in oklab, var(--error) 30%, transparent);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        @keyframes rowGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent) 40%, #fff);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        @keyframes boxGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent-2) 35%, #fff);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        @keyframes comboGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent) 45%, #fff);
+                box-shadow: 0 0 18px color-mix(in oklab, var(--accent-2) 50%, transparent);
+            }
+
+            100% {
+                background: transparent;
+                box-shadow: none;
+            }
+        }
+
+        @keyframes numberGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent-2) 35%, #fff);
+                transform: scale(1.05);
+            }
+
+            100% {
+                background: transparent;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes boardWin {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+
+            100% {
+                box-shadow: 0 0 40px 15px color-mix(in oklab, var(--accent) 40%, transparent);
+            }
+        }
+
         /* Mobile-specific optimizations */
         @media (max-width: 759px) {
             body {
@@ -527,11 +1196,66 @@
                 gap: 6px;
                 width: 100%;
                 max-width: calc(100vw - 8px);
+                display: flex;
+                flex-direction: column;
             }
 
             header {
                 padding: 6px 8px;
                 gap: 6px;
+            }
+
+            .player-hud {
+                order: 1;
+                width: 100%;
+            }
+
+            .top-stats {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                order: 2;
+            }
+
+            .grid-wrap {
+                order: 3;
+            }
+
+            .side,
+            .pad {
+                order: 4;
+            }
+
+            .legend {
+                order: 5;
+            }
+
+            .level-card {
+                width: 100%;
+                padding: 0;
+                border: none;
+                background: transparent;
+            }
+
+            .level-card summary {
+                background: var(--panel);
+                border-radius: var(--radius);
+                padding: 8px 12px;
+                box-shadow: var(--shadow);
+            }
+
+            .level-card-body {
+                margin-top: 8px;
+                background: var(--panel);
+                border-radius: var(--radius);
+                padding: 12px;
+                box-shadow: var(--shadow);
+                border: 1px solid color-mix(in oklab, var(--grid-line) 70%, transparent);
             }
 
             .board {
@@ -675,38 +1399,109 @@
             .side {
                 grid-column: 1;
             }
+
+            .level-summary-action {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="ambient-layer" aria-hidden="true">
+        <div class="ambient-orb orb-one"></div>
+        <div class="ambient-orb orb-two"></div>
+        <div class="ambient-orb orb-three"></div>
+    </div>
+    <div id="confetti-layer" aria-hidden="true"></div>
+    <div id="number-toast" aria-live="polite"></div>
     <div class="app">
-        <header>
-            <div class="right">
-                <button id="new" class="primary">New Game</button>
-                <button id="pause-btn">Pause</button>
-            </div>
-            <div class="left">
-                <label style="display:flex;align-items:center;gap:8px">
-                    <select id="mode">
-                        <option value="beginner">Beginner (guided)</option>
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                    </select>
-                </label>
-            </div>
-            <div class="status" id="status"></div>
-        </header>
-
-
-        <div class="game-stats">
-            <!-- Future use: time elapsed, moves made, etc. -->
-            <div class="timer" id="timer"></div>
-            <div class="wrong-moves" id="wrong-moves"></div>
-
+    <div class="hud-lite">
+        <div class="tip-banner" id="tip-banner"><span id="mode-pill">Mode: Beginner</span><span id="tip-text"></span></div>
+        <div class="stat-row">
+            <button class="stat-chip" type="button">
+                <span class="label">Time</span>
+                <span class="value" id="timer">00:00</span>
+            </button>
+            <button class="stat-chip" type="button">
+                <span class="label">Mistakes</span>
+                <span class="value" id="wrong-moves">0 / ∞</span>
+            </button>
+            <button class="stat-chip" type="button">
+                <span class="label">Streak</span>
+                <span class="value" id="streak">0</span>
+                <small id="best-streak">Best: 0</small>
+            </button>
         </div>
+        <div class="quick-strip">
+            <button type="button" id="focus-board" class="quick-action primary">🎯 Center</button>
+        </div>
+        <button type="button" id="menu-toggle" class="menu-btn" aria-label="Open menu">☰</button>
+        <div class="menu-panel" id="menu-panel">
+            <div class="chip-group">
+                <button type="button" id="daily-btn" class="chip-button">📅 Daily</button>
+                <button type="button" id="sound-toggle" class="chip-button">🔈 Off</button>
+                <button id="new" class="chip-button primary">New Game</button>
+                <button id="pause-btn" class="chip-button">Pause</button>
+            </div>
+            <details class="control-fold">
+                <summary>Mode & Theme</summary>
+                <div class="control-selects">
+                    <label>
+                        Puzzle Mode
+                        <select id="mode">
+                            <option value="beginner">Beginner (guided)</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="daily">Daily Challenge</option>
+                        </select>
+                    </label>
+                    <label>
+                        Palette
+                        <select id="palette">
+                            <option value="default">Bright</option>
+                            <option value="warm">Warm</option>
+                            <option value="mono">High Contrast</option>
+                        </select>
+                    </label>
+                </div>
+            </details>
+        </div>
+        <details class="level-card" id="level-card" aria-live="polite" open>
+            <summary class="level-card-summary">
+                <div class="level-chip" id="level-chip">🌱 Beginner Bloom</div>
+                <div class="level-summary-info">
+                    <span class="level-summary-title" id="level-summary-title">Assists & stats</span>
+                    <span class="level-summary-progress" id="level-summary-progress">0% complete</span>
+                </div>
+                <span class="level-summary-action" id="level-summary-action" aria-hidden="true">Tap for details</span>
+            </summary>
+            <div class="level-card-body">
+                <p class="level-description" id="level-flavor">Guided play with generous highlights while you learn the patterns.</p>
+                <div class="level-details" id="level-details">
+                    <div class="level-detail">
+                        <span class="detail-label">Guidance</span>
+                        <span class="detail-value">Row • Column • Box</span>
+                    </div>
+                    <div class="level-detail">
+                        <span class="detail-label">Mistake Shield</span>
+                        <span class="detail-value">Unlimited</span>
+                    </div>
+                    <div class="level-detail">
+                        <span class="detail-label">Hint Style</span>
+                        <span class="detail-value">Direct placement</span>
+                    </div>
+                </div>
+                <div class="level-meter" role="img" aria-label="Difficulty aura meter">
+                    <span class="level-meter-fill" id="level-meter-fill" style="width: 25%;"></span>
+                </div>
+                <div class="level-meter-legend">
+                    <span id="level-progress-label">0% board complete</span>
+                </div>
+            </div>
+        </details>
+    </div>
         <div class="grid-wrap">
-
             <div class="board" id="board" aria-label="Sudoku board">
                 <div class="grid" id="grid" role="grid" aria-rowcount="9" aria-colcount="9"></div>
             </div>
@@ -761,9 +1556,230 @@
             beginner: 'easy',
             easy: 'easy',
             medium: 'medium',
-            hard: 'hard'
+            hard: 'hard',
+            daily: 'medium'
             // or: 'hard': { minClues: 24, maxClues: 32, techniques: { NS:true, HS:true, NP:true, HP:true, PC:true } }
         };
+
+        const COLOR_THEMES = {
+            default: {
+                '--bg': '#f7f9fe',
+                '--panel': '#ffffff',
+                '--text': '#0d1321',
+                '--muted': '#5a657a',
+                '--accent': '#1352ff',
+                '--accent-2': '#0ea86f'
+            },
+            warm: {
+                '--bg': '#fff7f1',
+                '--panel': '#fff1e0',
+                '--text': '#2d1400',
+                '--muted': '#7a4e30',
+                '--accent': '#f97316',
+                '--accent-2': '#facc15'
+            },
+            mono: {
+                '--bg': '#f2f2f2',
+                '--panel': '#ffffff',
+                '--text': '#111111',
+                '--muted': '#4f4f4f',
+                '--accent': '#1f7ae0',
+                '--accent-2': '#0e9b6b'
+            }
+        };
+
+        const TIP_IDLE_MS = 12000;
+        let audioCtx = null;
+
+        const MODE_THEMES = {
+            beginner: {
+                label: 'Beginner Bloom',
+                icon: '🌱',
+                tagline: 'Guided play with generous highlights while you learn the patterns.',
+                progress: 25,
+                confetti: ['#8ec5ff', '#b5f6ff', '#c3ffd9'],
+                perks: [
+                    { label: 'Guidance', value: 'Row • Column • Box highlights' },
+                    { label: 'Mistake shield', value: 'Unlimited retries' },
+                    { label: 'Hints', value: 'Direct placements allowed' }
+                ],
+                tokens: {
+                    '--bg': '#f5f8ff',
+                    '--panel': '#ffffff',
+                    '--text': '#0d1321',
+                    '--muted': '#5a657a',
+                    '--accent': '#3b82f6',
+                    '--accent-2': '#22c55e',
+                    '--warn': '#f59e0b',
+                    '--error': '#ef4444',
+                    '--grid-line': '#d9e3ff',
+                    '--grid-strong': '#9cb2ff',
+                    '--grid-outer': '#4361ee',
+                    '--sel': '#e4f0ff',
+                    '--hilite': '#f4f7ff',
+                    '--ok': '#059669',
+                    '--btn-bg': '#ffffff',
+                    '--btn-fg': '#0d1321',
+                    '--btn-border': '#d2ddff',
+                    '--shadow': '0 12px 32px rgba(15, 35, 95, 0.12)',
+                    '--bg-gradient': 'linear-gradient(135deg, #f7f9ff 0%, #eef6ff 55%, #fdf7ff 100%)',
+                    '--ambient-1': 'rgba(67, 97, 238, 0.28)',
+                    '--ambient-2': 'rgba(14, 165, 233, 0.24)',
+                    '--ambient-3': 'rgba(16, 185, 129, 0.2)',
+                    '--glow-accent': 'rgba(67, 97, 238, 0.45)'
+                }
+            },
+            easy: {
+                label: 'Easy Ember',
+                icon: '🌤️',
+                tagline: 'Classic flow with subtle row guidance and forgiving tempo.',
+                progress: 45,
+                confetti: ['#ffd89c', '#ff9a8b', '#f6d365'],
+                perks: [
+                    { label: 'Guidance', value: 'Row highlights' },
+                    { label: 'Mistake shield', value: '5 chances' },
+                    { label: 'Hints', value: 'Direct placements allowed' }
+                ],
+                tokens: {
+                    '--bg': '#fff9f4',
+                    '--panel': '#ffffff',
+                    '--text': '#2c1b18',
+                    '--muted': '#7a5d57',
+                    '--accent': '#f97316',
+                    '--accent-2': '#facc15',
+                    '--warn': '#f59e0b',
+                    '--error': '#dc2626',
+                    '--grid-line': '#fde4cf',
+                    '--grid-strong': '#f8b4a3',
+                    '--grid-outer': '#f97316',
+                    '--sel': '#fff4e6',
+                    '--hilite': '#fff8ed',
+                    '--ok': '#16a34a',
+                    '--btn-bg': '#fffdf9',
+                    '--btn-fg': '#2c1b18',
+                    '--btn-border': '#fcd8b6',
+                    '--shadow': '0 12px 30px rgba(255, 149, 58, 0.18)',
+                    '--bg-gradient': 'linear-gradient(135deg, #fff7ed 0%, #ffe0c3 60%, #ffd4e1 100%)',
+                    '--ambient-1': 'rgba(249, 115, 22, 0.25)',
+                    '--ambient-2': 'rgba(236, 72, 153, 0.18)',
+                    '--ambient-3': 'rgba(250, 204, 21, 0.22)',
+                    '--glow-accent': 'rgba(249, 115, 22, 0.45)'
+                }
+            },
+            medium: {
+                label: 'Medium Pulse',
+                icon: '⚡',
+                tagline: 'Sharper tempo with tighter mistake limits and neon guidance.',
+                progress: 70,
+                confetti: ['#a855f7', '#38bdf8', '#f472b6'],
+                perks: [
+                    { label: 'Guidance', value: 'Focus-only highlighting' },
+                    { label: 'Mistake shield', value: '3 chances' },
+                    { label: 'Hints', value: 'Manual strategy encouraged' }
+                ],
+                tokens: {
+                    '--bg': '#f4f0ff',
+                    '--panel': '#fcfbff',
+                    '--text': '#140f2d',
+                    '--muted': '#6b5b8d',
+                    '--accent': '#8b5cf6',
+                    '--accent-2': '#22d3ee',
+                    '--warn': '#f97316',
+                    '--error': '#f43f5e',
+                    '--grid-line': '#d7d0f0',
+                    '--grid-strong': '#b69cf4',
+                    '--grid-outer': '#7c3aed',
+                    '--sel': '#f1eaff',
+                    '--hilite': '#f7f4ff',
+                    '--ok': '#14b8a6',
+                    '--btn-bg': '#fdfcff',
+                    '--btn-fg': '#140f2d',
+                    '--btn-border': '#d2c7ff',
+                    '--shadow': '0 14px 36px rgba(96, 56, 190, 0.2)',
+                    '--bg-gradient': 'linear-gradient(135deg, #f5f0ff 0%, #efe7ff 45%, #dff5ff 100%)',
+                    '--ambient-1': 'rgba(139, 92, 246, 0.3)',
+                    '--ambient-2': 'rgba(14, 165, 233, 0.24)',
+                    '--ambient-3': 'rgba(244, 114, 182, 0.24)',
+                    '--glow-accent': 'rgba(139, 92, 246, 0.5)'
+                }
+            },
+            hard: {
+                label: 'Hard Eclipse',
+                icon: '🚀',
+                tagline: 'Precision sprint — one mistake and the grid locks down.',
+                progress: 95,
+                confetti: ['#facc15', '#f43f5e', '#60a5fa'],
+                perks: [
+                    { label: 'Guidance', value: 'Pure focus mode' },
+                    { label: 'Mistake shield', value: 'Single strike' },
+                    { label: 'Hints', value: 'Use sparingly!' }
+                ],
+                tokens: {
+                    '--bg': '#050812',
+                    '--panel': '#11162c',
+                    '--text': '#eff2ff',
+                    '--muted': '#9ca3c8',
+                    '--accent': '#60a5fa',
+                    '--accent-2': '#f87171',
+                    '--warn': '#facc15',
+                    '--error': '#f87171',
+                    '--grid-line': '#202642',
+                    '--grid-strong': '#3d4b73',
+                    '--grid-outer': '#60a5fa',
+                    '--sel': '#182547',
+                    '--hilite': '#131b35',
+                    '--ok': '#4ade80',
+                    '--btn-bg': '#161d39',
+                    '--btn-fg': '#eff2ff',
+                    '--btn-border': '#28335d',
+                    '--shadow': '0 18px 40px rgba(0, 0, 0, 0.55)',
+                    '--bg-gradient': 'linear-gradient(160deg, #05070f 0%, #131a3a 55%, #341938 100%)',
+                    '--ambient-1': 'rgba(96, 165, 250, 0.25)',
+                    '--ambient-2': 'rgba(248, 113, 113, 0.2)',
+                    '--ambient-3': 'rgba(244, 114, 182, 0.18)',
+                    '--glow-accent': 'rgba(96, 165, 250, 0.5)'
+                }
+            },
+            daily: {
+                label: 'Daily Quest',
+                icon: '📅',
+                tagline: 'A fresh seeded puzzle each day to keep your streak alive.',
+                progress: 80,
+                confetti: ['#60a5fa', '#a78bfa', '#34d399'],
+                perks: [
+                    { label: 'Guidance', value: 'Medium-level assists' },
+                    { label: 'Mistake shield', value: '3 chances' },
+                    { label: 'Hints', value: 'Manual logic encouraged' }
+                ],
+                tokens: {
+                    '--bg': '#f1f6ff',
+                    '--panel': '#ffffff',
+                    '--text': '#0f172a',
+                    '--muted': '#5b6478',
+                    '--accent': '#2563eb',
+                    '--accent-2': '#14b8a6',
+                    '--warn': '#facc15',
+                    '--error': '#f87171',
+                    '--grid-line': '#d8e3ff',
+                    '--grid-strong': '#9cb7ff',
+                    '--grid-outer': '#2563eb',
+                    '--sel': '#dbeafe',
+                    '--hilite': '#f0f7ff',
+                    '--ok': '#22c55e',
+                    '--btn-bg': '#f7fbff',
+                    '--btn-fg': '#0f172a',
+                    '--btn-border': '#cfe1ff',
+                    '--shadow': '0 14px 32px rgba(37, 99, 235, 0.16)',
+                    '--bg-gradient': 'linear-gradient(135deg, #f1f6ff 0%, #dfefff 60%, #f6f7ff 100%)',
+                    '--ambient-1': 'rgba(37, 99, 235, 0.25)',
+                    '--ambient-2': 'rgba(20, 184, 166, 0.18)',
+                    '--ambient-3': 'rgba(14, 165, 233, 0.18)',
+                    '--glow-accent': 'rgba(37, 99, 235, 0.45)'
+                }
+            }
+        };
+
+        const MOBILE_BREAKPOINT = window.matchMedia('(max-width: 759px)');
 
         let state = {
             mode: 'beginner',
@@ -780,8 +1796,360 @@
             gameOver: false,
             isPaused: false,
             history: [],
-            future: []
+            future: [],
+            completedNumbers: new Set(),
+            streak: 0,
+            bestStreak: 0,
+            soundOn: false,
+            colorTheme: 'default',
+            tipTimer: null,
+            lastActionAt: Date.now(),
+            dailySeed: null
         };
+
+        function applyModeTheme(mode) {
+            const theme = MODE_THEMES[mode] || MODE_THEMES.beginner;
+            const root = document.documentElement;
+            Object.entries(theme.tokens).forEach(([token, value]) => {
+                root.style.setProperty(token, value);
+            });
+
+            const chip = $('#level-chip');
+            if (chip) chip.textContent = `${theme.icon} ${theme.label}`;
+
+            const flavor = $('#level-flavor');
+            if (flavor) flavor.textContent = theme.tagline;
+
+            const details = $('#level-details');
+            if (details) {
+                details.innerHTML = theme.perks.map(perk => `
+                    <div class="level-detail">
+                        <span class="detail-label">${perk.label}</span>
+                        <span class="detail-value">${perk.value}</span>
+                    </div>
+                `).join('');
+            }
+
+            updateLevelProgress();
+        }
+
+        function applyColorTheme(name) {
+            const theme = COLOR_THEMES[name] || COLOR_THEMES.default;
+            Object.entries(theme).forEach(([token, value]) => {
+                document.documentElement.style.setProperty(token, value);
+            });
+            state.colorTheme = name;
+            localStorage.setItem('sudokuPalette', name);
+        }
+
+        function burstConfetti({ count = 24, mode = state.mode } = {}) {
+            const layer = $('#confetti-layer');
+            if (!layer) return;
+            const palette = MODE_THEMES[mode]?.confetti || ['#ffffff'];
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement('span');
+                piece.className = 'confetti-piece';
+                piece.style.background = palette[i % palette.length];
+                piece.style.left = `${Math.random() * 100}%`;
+                piece.style.setProperty('--drift', `${(Math.random() - 0.5) * 30}vw`);
+                piece.style.setProperty('--spin', `${Math.random() > 0.5 ? 1 : -1}`);
+                piece.style.setProperty('--confetti-duration', `${1.6 + Math.random() * 1.2}s`);
+                layer.appendChild(piece);
+                setTimeout(() => piece.remove(), 2400);
+            }
+        }
+
+        function flashBoard() {
+            const board = $('#board');
+            if (!board) return;
+            board.classList.remove('board-flash');
+            // Force reflow so the animation can restart
+            void board.offsetWidth;
+            board.classList.add('board-flash');
+        }
+
+        function pulseWrongCell(i, { clearValue = false, extraCells = [] } = {}) {
+            const mainCell = cellAt(i);
+            if (!mainCell) return;
+            const row = Math.floor(i / 9), col = i % 9;
+            const affected = new Set();
+            affected.add(mainCell);
+            const extraNodes = new Set();
+
+            for (let c = 0; c < 9; c++) affected.add($cell(row, c));
+            for (let r = 0; r < 9; r++) affected.add($cell(r, col));
+            const br = Math.floor(row / 3) * 3, bc = Math.floor(col / 3) * 3;
+            for (let r = br; r < br + 3; r++) {
+                for (let c = bc; c < bc + 3; c++) affected.add($cell(r, c));
+            }
+
+            extraCells.forEach(idx => {
+                const extraCell = cellAt(idx);
+                if (extraCell) {
+                    affected.add(extraCell);
+                    extraNodes.add(extraCell);
+                }
+            });
+
+            affected.forEach(cell => {
+                if (!cell) return;
+                if (cell === mainCell || extraNodes.has(cell)) cell.classList.add('wrong-flash');
+                else cell.classList.add('wrong-section');
+            });
+
+            setTimeout(() => {
+                affected.forEach(cell => {
+                    if (!cell) return;
+                    cell.classList.remove('wrong-section');
+                    if (cell === mainCell || extraNodes.has(cell)) cell.classList.remove('wrong-flash');
+                });
+                if (clearValue) {
+                    state.cells[i] = 0;
+                    state.pencils[i].clear();
+                    mainCell.textContent = '';
+                    renderPencils(mainCell, i);
+                    highlightMatchingNumbers(0);
+                }
+            }, 620);
+        }
+
+        function focusBoard() {
+            const board = $('#board');
+            if (!board) return;
+            board.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function toggleSound() {
+            state.soundOn = !state.soundOn;
+            updateSoundButton();
+            localStorage.setItem('sudokuSound', state.soundOn ? '1' : '0');
+            if (state.soundOn && !audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function updateSoundButton() {
+            const btn = $('#sound-toggle');
+            if (!btn) return;
+            btn.classList.toggle('active', state.soundOn);
+            btn.textContent = state.soundOn ? '🔊 On' : '🔈 Off';
+        }
+
+        function toggleMenu(force) {
+            const panel = $('#menu-panel');
+            if (!panel) return;
+            const willShow = typeof force === 'boolean' ? force : !panel.classList.contains('show');
+            panel.classList.toggle('show', willShow);
+        }
+
+        function closeMenu() {
+            toggleMenu(false);
+        }
+
+        function playTone(type) {
+            if (!state.soundOn) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const now = audioCtx.currentTime;
+            const map = {
+                correct: 620,
+                row: 700,
+                box: 520,
+                combo: 840,
+                win: 940,
+                wrong: 240
+            };
+            osc.frequency.value = map[type] || 520;
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.3, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+            osc.type = 'sine';
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        }
+
+        function showNumberToast(message) {
+            const toast = $('#number-toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(showNumberToast.timeoutId);
+            showNumberToast.timeoutId = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        function numberButton(num) {
+            return $(`.pad button[data-num="${num}"]`);
+        }
+
+        function celebrateNumber(num) {
+            showNumberToast(`Great job! All ${num}s are locked in.`);
+            setStatus(`🎉 All ${num}s are complete!`);
+            burstConfetti({ count: 18, mode: state.mode });
+            const btn = numberButton(num);
+            if (btn) {
+                btn.classList.remove('celebrate');
+                void btn.offsetWidth;
+                btn.classList.add('celebrate');
+                setTimeout(() => btn.classList.remove('celebrate'), 1600);
+            }
+            const cellsToFlash = [];
+            const rowSets = new Set();
+            const colSets = new Set();
+            for (let i = 0; i < 81; i++) {
+                if (state.cells[i] === num) {
+                    const cell = cellAt(i);
+                    if (cell) cellsToFlash.push(cell);
+                    rowSets.add(Math.floor(i / 9));
+                    colSets.add(i % 9);
+                }
+            }
+            addTempClass(cellsToFlash, 'number-celebrate', 1000);
+            setTimeout(() => {
+                highlightMatchingNumbers(0);
+            }, 1000);
+            rowSets.forEach(r => {
+                const rowCells = [];
+                for (let c = 0; c < 9; c++) rowCells.push($cell(r, c));
+                addTempClass(rowCells, 'row-celebrate', 900);
+            });
+            colSets.forEach(c => {
+                const colCells = [];
+                for (let r = 0; r < 9; r++) colCells.push($cell(r, c));
+                addTempClass(colCells, 'row-celebrate', 900);
+            });
+            if (state.activeTip && state.activeTip.includes(`${num}`)) {
+                setTipMessage('Tip cleared. Keep going!');
+            }
+        }
+
+        function incrementStreak() {
+            state.streak++;
+            if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+            updateStreakDisplays();
+        }
+
+        function resetStreak() {
+            if (state.streak === 0) return;
+            state.streak = 0;
+            updateStreakDisplays();
+        }
+
+        function updateStreakDisplays() {
+            const streakEl = $('#streak');
+            if (streakEl) streakEl.textContent = state.streak;
+            const bestEl = $('#best-streak');
+            if (bestEl) bestEl.textContent = `Best: ${state.bestStreak}`;
+        }
+
+        function scheduleTip() {
+            if (state.tipTimer) clearTimeout(state.tipTimer);
+            state.lastActionAt = Date.now();
+            state.tipTimer = setTimeout(showIdleTip, TIP_IDLE_MS);
+        }
+
+        function showIdleTip() {
+            const tip = computeTipMessage();
+            state.activeTip = tip;
+            const textEl = $('#tip-text');
+            if (textEl) textEl.textContent = tip;
+            const modePill = $('#mode-pill');
+            if (modePill) modePill.textContent = `Mode: ${modeLabel(state.mode)}`;
+        }
+
+        function computeTipMessage() {
+            for (let r = 0; r < 9; r++) {
+                const zeros = state.cells.slice(r * 9, r * 9 + 9).filter(v => v === 0).length;
+                if (zeros === 1) return `Tip: Row ${r + 1} has just one open cell.`;
+            }
+            for (let c = 0; c < 9; c++) {
+                let zeros = 0;
+                for (let r = 0; r < 9; r++) if (state.cells[r * 9 + c] === 0) zeros++;
+                if (zeros === 1) return `Tip: Column ${c + 1} is almost solved.`;
+            }
+            const remainingCounts = Array(10).fill(0);
+            state.cells.forEach((v, idx) => {
+                if (v === 0) remainingCounts[state.solution[idx]]++;
+            });
+            let bestNum = 0, bestCount = Infinity;
+            for (let num = 1; num <= 9; num++) {
+                if (remainingCounts[num] > 0 && remainingCounts[num] < bestCount) {
+                    bestCount = remainingCounts[num];
+                    bestNum = num;
+                }
+            }
+            if (bestNum) return `Tip: Only ${bestCount} cells left for number ${bestNum}.`;
+            return 'Keep going! Trust your logic.';
+        }
+
+        function setTipMessage(message) {
+            const banner = $('#tip-text');
+            state.activeTip = message;
+            if (banner) banner.textContent = message || '';
+            const modePill = $('#mode-pill');
+            if (modePill) modePill.textContent = `Mode: ${modeLabel(state.mode)}`;
+        }
+
+        function loadDailyPuzzle(date = new Date()) {
+            const key = date.toISOString().slice(0, 10);
+            const seed = Number(key.replace(/-/g, ''));
+            state.dailySeed = key;
+            const puzzle = generatePuzzle({
+                target: 'medium',
+                symmetry: 'rotate',
+                seed
+            });
+            return puzzle;
+        }
+
+        function isNumberFullySolved(num) {
+            for (let i = 0; i < 81; i++) {
+                if (state.solution[i] === num && state.cells[i] !== num) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function checkNumberAchievements() {
+            if (!(state.mode === 'beginner' || state.mode === 'easy')) return;
+            if (!state.completedNumbers) state.completedNumbers = new Set();
+            for (let num = 1; num <= 9; num++) {
+                const complete = isNumberFullySolved(num);
+                const wasComplete = state.completedNumbers.has(num);
+                if (complete && !wasComplete) {
+                    state.completedNumbers.add(num);
+                    celebrateNumber(num);
+                } else if (!complete && wasComplete) {
+                    state.completedNumbers.delete(num);
+                }
+            }
+        }
+
+        function updateLevelSummaryAction() {
+            const action = $('#level-summary-action');
+            const levelCard = $('#level-card');
+            if (!action || !levelCard) return;
+            const isOpen = levelCard.hasAttribute('open');
+            action.textContent = isOpen ? 'Hide details' : 'Show assists';
+        }
+
+        function initLevelCardResponsive() {
+            const levelCard = $('#level-card');
+            if (!levelCard) return;
+            const syncCardState = () => {
+                if (MOBILE_BREAKPOINT.matches) {
+                    levelCard.removeAttribute('open');
+                } else {
+                    levelCard.setAttribute('open', '');
+                }
+                updateLevelSummaryAction();
+            };
+            syncCardState();
+            MOBILE_BREAKPOINT.addEventListener('change', syncCardState);
+            levelCard.addEventListener('toggle', updateLevelSummaryAction);
+        }
 
         function idx(r, c) { return (r * 9) + c; }
         function rc(index) { return [Math.floor(index / 9), index % 9]; }
@@ -789,15 +2157,24 @@
         function loadPuzzle(mode) {
             if (state.timerId) clearInterval(state.timerId);
             state.mode = mode;
-            const target = MODE_TO_TARGET[mode] || 'medium';
-            const { givens, solution } = generatePuzzle({
-                target,
-                symmetry: 'rotate',   // 'none' | 'rotate' | 'mirror' (optional)
-                seed: Date.now()      // pass a fixed number to make it reproducible
-            });
+            applyModeTheme(mode);
+            applyColorTheme(state.colorTheme || localStorage.getItem('sudokuPalette') || 'default');
+            let givens, solution;
+            if (mode === 'daily') {
+                const puzzle = loadDailyPuzzle();
+                ({ givens, solution } = puzzle);
+            } else {
+                const target = MODE_TO_TARGET[mode] || 'medium';
+                const generated = generatePuzzle({
+                    target,
+                    symmetry: 'rotate',
+                    seed: Date.now()
+                });
+                ({ givens, solution } = generated);
+            }
 
-            state.givens = givens.split('').map(Number);    // zeros for blanks
-            state.solution = solution.split('').map(Number); // full solved key
+            state.givens = givens.split('').map(Number);
+            state.solution = solution.split('').map(Number);
             state.cells = [...state.givens];
             state.pencils = Array.from({ length: 81 }, () => new Set());
             state.sel = null;
@@ -810,7 +2187,13 @@
             state.timerId = setInterval(timerTick, 1000);
             state.wrongMoves = 0;
             state.gameOver = false;
+            state.completedNumbers = new Set();
+            state.streak = 0;
+            updateStreakDisplays();
             switch (mode) {
+                case 'daily':
+                    state.wrongMovesLimit = 3;
+                    break;
                 case 'easy':
                     state.wrongMovesLimit = 5;
                     break;
@@ -826,10 +2209,17 @@
                     break;
             }
             renderBoard();
+            checkNumberAchievements();
             updateWrongMovesDisplay();
-            setStatus(`Mode: ${modeLabel(mode)}. Good luck!`);
+            if (mode === 'daily') {
+                setStatus(`Daily Challenge — ${state.dailySeed}`);
+            } else {
+            setTipMessage(state.activeTip || '');
+            }
+            scheduleTip();
+            setTipMessage('Building streaks increases your bonus animations!');
         }
-        function modeLabel(m) { return { beginner: "Beginner", easy: "Easy", medium: "Medium", hard: "Hard" }[m] || m; }
+        function modeLabel(m) { return { beginner: "Beginner", easy: "Easy", medium: "Medium", hard: "Hard", daily: "Daily" }[m] || m; }
 
         const gridEl = $('#grid');
 
@@ -862,11 +2252,16 @@
                 renderPencils(cell, i);
             }
             paintSelection();
+            updateLevelProgress();
         }
 
         function selectCell(i) {
             state.sel = i;
             paintSelection();
+            const value = state.cells[i];
+            if (value === 0) {
+                highlightMatchingNumbers(0);
+            }
         }
         function $cell(r, c) { return $(`.cell[data-r="${r + 1}"][data-c="${c + 1}"]`, gridEl) }
         function cellAt(i) { const r = Math.floor(i / 9), c = i % 9; return $cell(r, c); }
@@ -900,7 +2295,7 @@
 
         function highlightMatchingNumbers(num) {
             // Clear previous number highlights
-            $$('.cell', gridEl).forEach(el => el.classList.remove('number-match'));
+            $$('.cell', gridEl).forEach(el => el.classList.remove('number-match', 'number-match-row', 'number-match-col'));
 
             // Only highlight if num is valid (1-9)
             if (!num || num < 1 || num > 9) return;
@@ -908,9 +2303,24 @@
             // Highlight all cells that contain the same number
             for (let i = 0; i < 81; i++) {
                 if (state.cells[i] === num) {
-                    cellAt(i).classList.add('number-match');
+                    const cell = cellAt(i);
+                    if (!cell) continue;
+                    cell.classList.add('number-match');
+                    if (state.mode === 'beginner') {
+                        const r = Math.floor(i / 9), c = i % 9;
+                        for (let cc = 0; cc < 9; cc++) $cell(r, cc).classList.add('number-match-row');
+                        for (let rr = 0; rr < 9; rr++) $cell(rr, c).classList.add('number-match-col');
+                    }
                 }
             }
+        }
+
+        function addTempClass(nodes, className, duration = 1000) {
+            if (!nodes) return;
+            const list = Array.isArray(nodes) ? nodes : [nodes];
+            const unique = list.filter(Boolean);
+            unique.forEach(node => node.classList.add(className));
+            setTimeout(() => unique.forEach(node => node.classList.remove(className)), duration);
         }
 
         function duplicatesFor(i, val) {
@@ -940,7 +2350,7 @@
             return [...hits];
         }
 
-        function clearFeedback() { $$('.cell').forEach(el => el.classList.remove('dup', 'hint-target', 'error')); }
+        function clearFeedback() { $$('.cell').forEach(el => el.classList.remove('dup', 'hint-target', 'error', 'wrong-flash', 'wrong-section')); }
 
         function applyImmediateFeedback(i, val) {
             clearFeedback();
@@ -948,8 +2358,21 @@
 
             const dups = duplicatesFor(i, val);
             if (dups.length) {
-                [i, ...dups].forEach(j => cellAt(j).classList.add('dup'));
-                setStatus('Duplicate detected in row/column/box.');
+                if (state.mode === 'beginner' || state.mode === 'easy') {
+                    const clearValue = state.mode === 'beginner';
+                    state.wrongMoves++;
+                    updateWrongMovesDisplay();
+                    resetStreak();
+                    playTone('wrong');
+                    if (enforceMistakeLimit(i)) return;
+                    pulseWrongCell(i, { clearValue, extraCells: dups });
+                    setStatus(clearValue ? 'Duplicate detected. Value removed.' : 'Duplicate detected. Fix highlighted cells.');
+                } else {
+                    [i, ...dups].forEach(j => cellAt(j).classList.add('dup'));
+                    setStatus('Duplicate detected in row/column/box.');
+                    resetStreak();
+                    playTone('wrong');
+                }
                 return;
             }
             const correct = state.solution[i] === val;
@@ -958,16 +2381,13 @@
             state.wrongMoves++;
             updateWrongMovesDisplay();
 
-            if (state.wrongMovesLimit !== Infinity && state.wrongMoves >= state.wrongMovesLimit) {
-                if (state.timerId) clearInterval(state.timerId);
-                state.gameOver = true;
-                cellAt(i).classList.add('error');
-                showGameOverModal('Game Over! You\'ve made too many mistakes.'); // Use the modal
-                saveGame(); // Save the final state
-                return;
-            }
+            if (enforceMistakeLimit(i)) return;
 
-            if (state.mode === 'beginner') {
+            if (state.mode === 'beginner' || state.mode === 'easy') {
+                const clearValue = state.mode === 'beginner';
+                pulseWrongCell(i, { clearValue });
+                resetStreak();
+                playTone('wrong');
                 const r = Math.floor(i / 9), c = i % 9;
                 let target = -1;
                 for (let cc = 0; cc < 9; cc++) { const j = r * 9 + cc; if (state.solution[j] === val) { target = j; break; } }
@@ -983,6 +2403,8 @@
             } else {
                 setStatus('That value is incorrect.');
                 cellAt(i).classList.add('error');
+                resetStreak();
+                playTone('wrong');
             }
         }
 
@@ -1006,6 +2428,7 @@
             state.pencils = prevState.pencils;
             refreshBoardState();
             setStatus('Undo.');
+            scheduleTip();
         }
         function redo() {
             if (state.isPaused) return;
@@ -1020,6 +2443,7 @@
             state.pencils = nextState.pencils;
             refreshBoardState();
             setStatus('Redo.');
+            scheduleTip();
         }
         function refreshBoardState() {
             for (let i = 0; i < 81; i++) {
@@ -1029,6 +2453,8 @@
             }
             clearFeedback();
             paintSelection(); // Repaint selection highlights
+            updateLevelProgress();
+            checkNumberAchievements();
         }
         function updateWrongMovesDisplay() {
             const el = $('#wrong-moves');
@@ -1038,7 +2464,34 @@
             const limitDisplay = (state.wrongMovesLimit === Infinity) ? '∞' : state.wrongMovesLimit;
 
             // Always display in the "X / Y" format
-            el.textContent = `Mistakes: ${state.wrongMoves} / ${limitDisplay}`;
+            el.textContent = `${state.wrongMoves} / ${limitDisplay}`;
+            updateLevelProgress();
+        }
+
+        function enforceMistakeLimit(i) {
+            if (state.wrongMovesLimit === Infinity) return false;
+            if (state.wrongMoves < state.wrongMovesLimit) return false;
+            if (state.timerId) clearInterval(state.timerId);
+            state.gameOver = true;
+            cellAt(i).classList.add('error');
+            showGameOverModal('Game Over! You\'ve made too many mistakes.');
+            saveGame();
+            return true;
+        }
+
+        function updateLevelProgress() {
+            if (!state || !state.cells) return;
+            const solvedCells = state.cells.reduce((count, value) => count + (value !== 0 ? 1 : 0), 0);
+            const percent = Math.round((solvedCells / 81) * 100);
+
+            const fill = $('#level-meter-fill');
+            if (fill) fill.style.width = `${Math.max(percent, 4)}%`;
+
+            const progressLabel = $('#level-progress-label');
+            if (progressLabel) progressLabel.textContent = `${percent}% board complete`;
+
+            const summaryProgress = $('#level-summary-progress');
+            if (summaryProgress) summaryProgress.textContent = `${percent}% complete`;
         }
 
         /* === COMPLETION CHECKING FUNCTIONS === */
@@ -1090,56 +2543,78 @@
         // Apply completion animations and styling
         function markCompletedSeries(cellRow, cellCol) {
             const completedSeries = []; // Track what got completed for status message
+            const rowCells = [];
+            const colCells = [];
+            const boxCells = [];
+            const rowDone = isRowComplete(cellRow);
+            const colDone = isColumnComplete(cellCol);
+            const boxDone = isSectionComplete(cellRow, cellCol);
 
-            // Check and mark completed row
-            if (isRowComplete(cellRow)) {
+            if (rowDone) {
                 for (let c = 0; c < 9; c++) {
                     const cellEl = $cell(cellRow, c);
+                    rowCells.push(cellEl);
                     cellEl.classList.add('completed');
-                    // After animation ends, add locked styling
                     setTimeout(() => {
                         cellEl.classList.remove('completed');
                         cellEl.classList.add('locked');
                     }, 800);
                 }
+                addTempClass(rowCells, 'row-celebrate', 900);
                 completedSeries.push('row');
+                playTone('row');
+                if (state.activeTip && state.activeTip.includes(`Row ${cellRow + 1}`)) {
+                    setTipMessage('');
+                }
             }
 
-            // Check and mark completed column
-            if (isColumnComplete(cellCol)) {
+            if (colDone) {
                 for (let r = 0; r < 9; r++) {
                     const cellEl = $cell(r, cellCol);
+                    colCells.push(cellEl);
                     cellEl.classList.add('completed');
-                    // After animation ends, add locked styling
                     setTimeout(() => {
                         cellEl.classList.remove('completed');
                         cellEl.classList.add('locked');
                     }, 800);
                 }
+                addTempClass(colCells, 'row-celebrate', 900);
                 completedSeries.push('column');
+                playTone('row');
+                if (state.activeTip && state.activeTip.includes(`Column ${cellCol + 1}`)) {
+                    setTipMessage('');
+                }
             }
 
-            // Check and mark completed 3x3 section
-            if (isSectionComplete(cellRow, cellCol)) {
+            if (boxDone) {
                 const startRow = Math.floor(cellRow / 3) * 3;
                 const startCol = Math.floor(cellCol / 3) * 3;
 
                 for (let r = startRow; r < startRow + 3; r++) {
                     for (let c = startCol; c < startCol + 3; c++) {
                         const cellEl = $cell(r, c);
+                        boxCells.push(cellEl);
                         cellEl.classList.add('completed');
-                        // After animation ends, add locked styling
                         setTimeout(() => {
                             cellEl.classList.remove('completed');
                             cellEl.classList.add('locked');
                         }, 800);
                     }
                 }
+                addTempClass(boxCells, 'box-celebrate', 900);
                 completedSeries.push('section');
+                playTone('box');
+            }
+
+            if (rowDone && boxDone) {
+                addTempClass([...rowCells, ...boxCells], 'combo-celebrate', 1100);
+                playTone('combo');
             }
 
             // Update status message if any series were completed
             if (completedSeries.length > 0) {
+                flashBoard();
+                burstConfetti({ count: 6 + completedSeries.length * 4, mode: state.mode });
                 const seriesText = completedSeries.join(' and ');
                 setStatus(`🎉 Completed ${seriesText}!`);
             }
@@ -1175,6 +2650,13 @@
             const cellRow = Math.floor(i / 9);
             const cellCol = i % 9;
             markCompletedSeries(cellRow, cellCol);
+            checkNumberAchievements();
+            updateLevelProgress();
+            if (state.cells[i] === state.solution[i]) {
+                incrementStreak();
+                playTone('correct');
+            }
+            scheduleTip();
 
             // Automatically check the puzzle on the last move in hard mode
             const isBoardFull = !state.cells.includes(0);
@@ -1210,7 +2692,12 @@
 
                 // Clear number highlights when erasing a number
                 highlightMatchingNumbers(0);
+                checkNumberAchievements();
+                updateLevelProgress();
+                resetStreak();
+                if (state.activeTip && state.activeTip.includes(`Row ${Math.floor(i / 9) + 1}`)) setTipMessage('');
             }
+            scheduleTip();
         }
         // --- NEW: Pause and Resume Functions ---
         function pauseGame() {
@@ -1237,7 +2724,9 @@
             // Convert Sets to arrays for JSON serialization
             const serializableState = {
                 ...state,
-                pencils: state.pencils.map(s => Array.from(s))
+                pencils: state.pencils.map(s => Array.from(s)),
+                completedNumbers: Array.from(state.completedNumbers),
+                tipTimer: null
             };
             localStorage.setItem('sudokuGameState', JSON.stringify(serializableState));
         }
@@ -1252,12 +2741,23 @@
             state = {
                 ...savedState,
                 pencils: savedState.pencils.map(p => new Set(p)), // Convert arrays back to Sets
-                isPaused: false // Always start unpaused
+                isPaused: false, // Always start unpaused
+                completedNumbers: new Set(savedState.completedNumbers || []),
+                tipTimer: null
             };
+            applyModeTheme(state.mode || 'beginner');
+            applyColorTheme(state.colorTheme || 'default');
+            state.streak = state.streak || 0;
+            state.bestStreak = state.bestStreak || 0;
+            updateStreakDisplays();
+            updateSoundButton();
+            if (state.soundOn && !audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            localStorage.setItem('sudokuSound', state.soundOn ? '1' : '0');
 
             // Re-render board and UI
             renderBoard();
             updateWrongMovesDisplay();
+            checkNumberAchievements();
 
             // Resume timer if game was in progress
             if (!state.gameOver) {
@@ -1271,6 +2771,8 @@
                 showGameOverModal(message);
             }
 
+            scheduleTip();
+            setTipMessage('Welcome back! Resume your logic streak.');
             return true; // Indicate that a game was loaded
         }
 
@@ -1286,6 +2788,9 @@
             const ok = state.cells.every((v, i) => v === state.solution[i]);
             if (ok) {
                 showGameOverModal('Congratulations, You Win! 🏆');
+                addTempClass($$('.cell'), 'board-celebrate', 1400);
+                playTone('win');
+                burstConfetti({ count: 48, mode: state.mode });
             } else {
                 showGameOverModal('Almost! Some entries are wrong.');
             }
@@ -1315,6 +2820,10 @@
             cellAt(i).textContent = state.cells[i];
             clearFeedback();
             setStatus('Hint applied to the selected cell.');
+            checkNumberAchievements();
+            updateLevelProgress();
+            resetStreak();
+            scheduleTip();
         }
 
         function moveSel(dr, dc) {
@@ -1374,6 +2883,7 @@
 
             // Re-render the pencils for the current cell
             renderPencils(cellAt(i), i);
+            scheduleTip();
         }
 
         // This function will run every second to update the timer display
@@ -1429,6 +2939,7 @@
                     localStorage.removeItem('sudokuGameState');
                     $('#game-over-modal').classList.add('hidden');
                     loadPuzzle(state.mode);
+                    closeMenu();
                     break;
                 case 'finish-btn':
                     finish();
@@ -1441,6 +2952,12 @@
                     break;
                 case 'clear':
                     erase();
+                    break;
+                case 'focus-board':
+                    focusBoard();
+                    break;
+                case 'menu-toggle':
+                    toggleMenu();
                     break;
                 case 'check':
                     checkCell();
@@ -1456,6 +2973,19 @@
                     target.classList.toggle('active', state.pencilMode);
                     setStatus(state.pencilMode ? 'Pencil mode is ON' : 'Pencil mode is OFF');
                     break;
+                case 'sound-toggle':
+                    toggleSound();
+                    closeMenu();
+                    break;
+                case 'daily-btn':
+                    $('#mode').value = 'daily';
+                    loadPuzzle('daily');
+                    closeMenu();
+                    break;
+                case 'pause-btn':
+                    pauseGame();
+                    closeMenu();
+                    break;
             }
         });
 
@@ -1463,10 +2993,44 @@
         $('#mode').addEventListener('change', e => {
             localStorage.removeItem('sudokuGameState');
             loadPuzzle(e.target.value);
+            closeMenu();
         });
 
+        const paletteSelect = $('#palette');
+        const savedPalette = localStorage.getItem('sudokuPalette') || 'default';
+        applyColorTheme(savedPalette);
+        if (paletteSelect) {
+            paletteSelect.value = savedPalette;
+            paletteSelect.addEventListener('change', e => applyColorTheme(e.target.value));
+        }
 
-        function setStatus(msg) { $('#status').textContent = msg || '' }
+        const savedSoundPref = localStorage.getItem('sudokuSound') === '1';
+        state.soundOn = savedSoundPref;
+        updateSoundButton();
+        if (state.soundOn && !audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        setTipMessage('Welcome! Keep a streak going for extra flair.');
+        scheduleTip();
+
+        document.addEventListener('click', (e) => {
+            const panel = $('#menu-panel');
+            const toggle = $('#menu-toggle');
+            if (!panel || !panel.classList.contains('show')) return;
+            if (toggle && (e.target === toggle || toggle.contains(e.target))) return;
+            if (!panel.contains(e.target)) toggleMenu(false);
+        });
+
+        function setStatus(msg) {
+            if (!msg) return;
+            const toast = $('#number-toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(setStatus.timeoutId);
+            setStatus.timeoutId = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        initLevelCardResponsive();
 
         // --- Final Game Load ---
         if (!loadGame()) {
