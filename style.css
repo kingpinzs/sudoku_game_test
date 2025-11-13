@@ -1,0 +1,1401 @@
+
+        :root {
+            --bg: #f7f9fe;
+            --panel: #ffffff;
+            --text: #0d1321;
+            --muted: #5a657a;
+            --accent: #1352ff;
+            --accent-2: #0ea86f;
+            --warn: #e7a100;
+            --error: #d64545;
+
+            --grid-line: #cfd7eb;
+            /* thin 1px */
+            --grid-strong: #7986cb;
+            /* thick 3×3 */
+            --grid-outer: #3f51b5;
+            /* outer frame */
+
+            --sel: #e9f1ff;
+            --hilite: #f3f6ff;
+            --ok: #1d936d;
+
+            --btn-bg: #ffffff;
+            /* keypad buttons */
+            --btn-fg: #0d1321;
+            --btn-border: #cfd7eb;
+
+            --shadow: 0 6px 20px rgba(20, 32, 70, .10);
+            --radius: 14px;
+            --bg-gradient: linear-gradient(130deg, #f7f9fe 0%, #eef3ff 55%, #fdf8ff 100%);
+            --ambient-1: rgba(19, 82, 255, 0.15);
+            --ambient-2: rgba(14, 168, 111, 0.15);
+            --ambient-3: rgba(255, 255, 255, 0.08);
+            --glow-accent: rgba(19, 82, 255, 0.35);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f1124;
+                --panel: #171a33;
+                --text: #eaf0ff;
+                --muted: #aab3d0;
+                --accent: #5dd3ff;
+                --accent-2: #8dffb0;
+                --warn: #ffbe55;
+                --error: #ff6b6b;
+                --grid-line: #303a66;
+                --grid-strong: #6e79bf;
+                --grid-outer: #9aa5ff;
+                --sel: #223064;
+                --hilite: #1b2450;
+                --ok: #21bc8b;
+
+                --btn-bg: #1e2347;
+                --btn-fg: #eaf0ff;
+                --btn-border: #3a4a80;
+                --shadow: 0 10px 28px rgba(0, 0, 0, .35);
+                --bg-gradient: linear-gradient(140deg, #0f1124 0%, #11153c 55%, #1b1e3d 100%);
+                --ambient-1: rgba(93, 211, 255, 0.08);
+                --ambient-2: rgba(141, 255, 176, 0.08);
+                --ambient-3: rgba(147, 149, 255, 0.08);
+                --glow-accent: rgba(93, 211, 255, 0.35);
+            }
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-gradient);
+            color: var(--text);
+            font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            /* Use dynamic viewport height when available */
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25), transparent 55%);
+            mix-blend-mode: screen;
+            opacity: .25;
+            animation: auroraFade 12s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        body::after {
+            background: radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.15), transparent 50%);
+            animation-duration: 16s;
+        }
+
+        .app {
+            width: min(1020px, 100%);
+            max-width: 100vw;
+            display: grid;
+            gap: 8px;
+            grid-template-columns: 1fr;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ambient-layer {
+            position: fixed;
+            inset: -10%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(8px);
+            opacity: 0.85;
+        }
+
+        .ambient-orb {
+            position: absolute;
+            width: clamp(280px, 35vw, 520px);
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            opacity: 0.28;
+            animation: orbFloat 18s ease-in-out infinite;
+        }
+
+        .orb-one {
+            top: 2%;
+            left: 10%;
+            animation-duration: 22s;
+            background: radial-gradient(circle, var(--ambient-1) 0%, transparent 65%);
+        }
+
+        .orb-two {
+            bottom: 5%;
+            right: 5%;
+            animation-duration: 18s;
+            animation-delay: -5s;
+            background: radial-gradient(circle, var(--ambient-2) 0%, transparent 65%);
+        }
+
+        .orb-three {
+            top: 20%;
+            right: 35%;
+            animation-duration: 26s;
+            animation-delay: -12s;
+            background: radial-gradient(circle, var(--ambient-3) 0%, transparent 60%);
+        }
+
+        header {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            min-height: 44px;
+            /* Ensure touch-friendly height */
+        }
+
+        header .left,
+        header .right {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        select,
+        button {
+            appearance: none;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 600;
+            background: #f3f6ff;
+            color: var(--text);
+            box-shadow: inset 0 0 0 1px var(--grid-line);
+        }
+
+        .util-buttons {
+            justify-content: center;
+        }
+
+        select {
+            min-width: 140px
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: none
+        }
+
+        button.secondary {
+            background: color-mix(in oklab, var(--accent) 12%, #f5f7ff);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        button.warn {
+            background: var(--warn);
+            color: #1f1400
+        }
+
+        button:disabled {
+            opacity: .6
+        }
+
+        .grid-wrap {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr;
+        }
+
+        .board {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 10px;
+            box-shadow: var(--shadow);
+            aspect-ratio: 1/1;
+            position: relative;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* === BOARD FRAME === */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--panel);
+            box-shadow: inset 0 0 0 3px var(--grid-outer);
+        }
+
+        /* === CELLS & LINES === */
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: clamp(18px, 5.1vw, 28px);
+            color: var(--text);
+            background: transparent;
+            position: relative;
+            border-right: 1px solid var(--grid-line);
+            border-bottom: 1px solid var(--grid-line);
+        }
+
+        .cell[data-c="1"] {
+            border-left: 3px solid var(--grid-outer);
+        }
+
+        .cell[data-r="1"] {
+            border-top: 3px solid var(--grid-outer);
+        }
+
+        .cell[data-c="9"] {
+            border-right: 3px solid var(--grid-outer);
+        }
+
+        .cell[data-r="9"] {
+            border-bottom: 3px solid var(--grid-outer);
+        }
+
+        /* THICK 3×3 boundaries */
+        .cell[data-c="3"],
+        .cell[data-c="6"] {
+            border-right: 3px solid var(--grid-strong);
+        }
+
+        .cell[data-r="3"],
+        .cell[data-r="6"] {
+            border-bottom: 3px solid var(--grid-strong);
+        }
+
+        .cell[data-given="1"] {
+            color: #2b4cff;
+            opacity: .95
+        }
+
+        /* states */
+        .cell.selected {
+            background: var(--sel)
+        }
+
+        .cell.hilite {
+            background: var(--hilite)
+        }
+
+        .cell.dup {
+            background: color-mix(in oklab, var(--error) 18%, transparent);
+        }
+
+        .cell.hint-target {
+            outline: 3px solid var(--accent-2);
+            z-index: 2
+        }
+
+        .cell.error {
+            animation: blink .7s ease-in-out 0s 3;
+        }
+
+        .cell.wrong-flash {
+            animation: wrongPulse 0.55s ease;
+            color: var(--error) !important;
+            font-weight: 800;
+            background: color-mix(in oklab, var(--error) 35%, #fff) !important;
+            box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--error) 60%, transparent), 0 0 0 1px #fff;
+        }
+
+        .cell.wrong-section {
+            animation: wrongSection 0.6s ease;
+        }
+
+        .cell.selected {
+            outline: 2px solid #3b82f6;
+            /* A bright blue outline */
+            outline-offset: -2px;
+            /* Draws the outline inside the cell bounds */
+        }
+
+        .cell.number-match {
+            background: color-mix(in oklab, var(--accent) 28%, #ffffff 72%);
+            color: color-mix(in oklab, var(--accent) 90%, #000);
+            box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--accent) 65%, transparent);
+            outline: none;
+        }
+
+        .cell.number-match-row {
+            background: color-mix(in oklab, #d97706 30%, transparent);
+        }
+
+        .cell.number-match-col {
+            background: color-mix(in oklab, #a21caf 35%, transparent);
+        }
+
+        .cell.row-celebrate {
+            animation: rowGlow 0.9s ease;
+        }
+
+        .cell.box-celebrate {
+            animation: boxGlow 0.9s ease;
+        }
+
+        .cell.combo-celebrate {
+            animation: comboGlow 1.1s ease;
+        }
+
+        .cell.number-celebrate {
+            animation: numberGlow 1s ease;
+        }
+
+        .board.board-celebrate {
+            animation: boardWin 1.2s ease;
+        }
+
+        /* --- CSS for Pencil Functionality --- */
+
+        /* Make cell a positioning container for the pencil grid */
+        .cell {
+            position: relative;
+        }
+
+        /* The grid that holds the small pencil numbers */
+        .pencil-grid {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            font-size: 0.7rem;
+            /* Adjust size as needed */
+            color: #4a5568;
+            /* A dimmer color for notes */
+            pointer-events: none;
+            /* Allows clicking "through" the grid onto the cell */
+        }
+
+        /* A single pencil number container */
+        .pencil-grid span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Style for the pencil button when it's active */
+        #pencil.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                background: transparent
+            }
+
+            50% {
+                background: color-mix(in oklab, var(--error) 22%, transparent)
+            }
+        }
+
+        /* Completion animation - vibrate effect */
+        @keyframes vibrate {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10% {
+                transform: translateX(-2px);
+            }
+
+            20% {
+                transform: translateX(2px);
+            }
+
+            30% {
+                transform: translateX(-2px);
+            }
+
+            40% {
+                transform: translateX(2px);
+            }
+
+            50% {
+                transform: translateX(-1px);
+            }
+
+            60% {
+                transform: translateX(1px);
+            }
+
+            70% {
+                transform: translateX(-1px);
+            }
+
+            80% {
+                transform: translateX(1px);
+            }
+
+            90% {
+                transform: translateX(0);
+            }
+        }
+
+        /* Completion animation class */
+        .cell.completed {
+            animation: vibrate 0.8s ease-in-out;
+        }
+
+        /* Read-only/locked styling for completed series */
+        .cell.locked {
+            background: color-mix(in oklab, var(--ok) 8%, transparent);
+            color: var(--ok);
+            opacity: 0.9;
+            /* Use border-color instead of border to preserve existing border widths */
+            border-color: color-mix(in oklab, var(--ok) 20%, transparent);
+        }
+
+        /* === KEYPAD (high contrast) === */
+        .pad {
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .pad button {
+            background: var(--btn-bg);
+            color: var(--btn-fg);
+            font-weight: 900;
+            font-size: 22px;
+            padding: 14px 12px;
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 2px var(--btn-border);
+        }
+
+        .pad button:active {
+            transform: translateY(1px);
+        }
+
+        .pad button[data-num] {
+            font-feature-settings: "tnum", "cv02";
+        }
+
+        .pad button.action {
+            font-size: 14px;
+            font-weight: 800
+        }
+
+        .pad button.clear {
+            background: #fff5f5;
+            box-shadow: inset 0 0 0 2px #f3b7b7;
+            color: #7a0f0f;
+        }
+
+        .pad button.celebrate {
+            animation: numberPulse 1.6s ease-out;
+            box-shadow: 0 0 18px color-mix(in oklab, var(--accent-2) 60%, transparent);
+        }
+
+        .legend {
+            color: var(--muted);
+            font-size: 13px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 0 2px;
+        }
+
+        .legend .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px
+        }
+
+        .tip-banner {
+            background: color-mix(in oklab, var(--accent) 10%, var(--panel));
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            min-height: 20px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tip-banner strong {
+            color: var(--accent);
+        }
+
+        .tip-banner #mode-pill {
+            background: color-mix(in oklab, var(--accent) 15%, transparent);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .dot.hi {
+            background: var(--hilite)
+        }
+
+        .dot.sel {
+            background: var(--sel)
+        }
+
+        .dot.dup {
+            background: color-mix(in oklab, var(--error) 45%, transparent)
+        }
+
+        .dot.hint {
+            background: color-mix(in oklab, var(--accent-2) 65%, transparent)
+        }
+
+        .status {
+            font-size: 14px;
+            color: var(--muted);
+            padding: 0 2px 6px 2px;
+            min-height: 1.2em;
+        }
+        .utils {
+            width: 88px;
+            background: white;
+            height: 50px;
+        }
+
+        .hud-lite {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            position: relative;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .stat-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            background: color-mix(in oklab, var(--accent) 8%, var(--panel));
+            box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 10%, transparent);
+        }
+
+        .stat-chip .label {
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .stat-chip .value {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .stat-chip small {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .quick-strip {
+            display: flex;
+            justify-content: center;
+            margin-top: -4px;
+        }
+
+        .quick-action {
+            flex: 1;
+            border: none;
+            border-radius: 999px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 700;
+            background: var(--panel);
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .quick-action.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .quick-action.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .menu-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 11;
+        }
+
+        .menu-panel {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            width: min(280px, 90vw);
+            background: var(--panel);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .menu-panel.show {
+            display: flex;
+        }
+
+        .chip-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .chip-button {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 16px;
+            font-weight: 700;
+            background: color-mix(in oklab, var(--accent) 10%, var(--panel));
+            color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .chip-button.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .control-fold {
+            border: none;
+            border-radius: var(--radius);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            padding: 8px 12px;
+        }
+
+        .control-fold summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .control-fold[open] summary {
+            margin-bottom: 8px;
+        }
+
+        .control-selects {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-selects label {
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+            color: var(--muted);
+            gap: 4px;
+        }
+
+        .control-selects select {
+            border-radius: 12px;
+            border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
+            padding: 6px 10px;
+        }
+
+        .level-card {
+            background: color-mix(in oklab, var(--panel) 85%, transparent);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid color-mix(in oklab, var(--grid-line) 75%, transparent);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .level-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: color-mix(in oklab, var(--accent) 18%, transparent);
+            color: var(--text);
+        }
+
+        .level-description {
+            margin: 0;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .level-details {
+            display: grid;
+            gap: 6px;
+            margin: 6px 0 10px;
+        }
+
+        .level-detail {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--muted);
+            border-bottom: 1px dashed color-mix(in oklab, var(--grid-line) 65%, transparent);
+            padding-bottom: 4px;
+        }
+
+        .level-detail:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            color: color-mix(in oklab, var(--text) 70%, var(--muted));
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .level-meter {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: color-mix(in oklab, var(--panel) 40%, transparent);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .level-meter-fill {
+            position: absolute;
+            inset: 0;
+            width: 30%;
+            background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 90%, var(--accent-2) 30%), var(--accent));
+            border-radius: inherit;
+            box-shadow: 0 0 12px color-mix(in oklab, var(--accent) 40%, transparent);
+            transition: width 0.6s ease, opacity 0.6s ease;
+            opacity: 0.9;
+        }
+
+        .level-meter-legend {
+            display: flex;
+            justify-content: flex-start;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            gap: 10px;
+        }
+
+        .level-card summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            list-style: none;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+
+        .level-card summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .level-card-body {
+            margin-top: 6px;
+        }
+
+        .level-summary-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .level-summary-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .level-summary-progress {
+            font-size: 13px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .level-summary-action {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .board.board-flash {
+            animation: boardGlow 0.9s ease-out;
+        }
+
+        #confetti-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        #number-toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel);
+            border-radius: 999px;
+            padding: 10px 18px;
+            font-weight: 700;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 3;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #number-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .confetti-piece {
+            position: absolute;
+            top: -5vh;
+            width: 10px;
+            height: 18px;
+            border-radius: 3px;
+            opacity: 0.95;
+            transform-origin: center;
+            animation: confettiFall var(--confetti-duration, 2s) linear forwards;
+        }
+
+        /* --- Visual Polish & New Feature CSS --- */
+
+        /* Fix for selection outline conflicting with grid borders */
+        .cell.selected {
+            outline: none;
+            /* Remove the old outline */
+            box-shadow: inset 0 0 0 3px var(--accent);
+            background-color: var(--sel);
+        }
+
+        /* Modal styles for Pause and Game Over screens */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--panel);
+            padding: 30px 40px;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-content h2 {
+            margin: 0 0 20px 0;
+            color: var(--text);
+        }
+
+        /* Utility class to hide modals */
+        .hidden {
+            display: none;
+        }
+
+
+        /* Style for when you hover over any clickable button */
+        button:not(:disabled):hover {
+            cursor: pointer;
+            filter: brightness(110%);
+            /* Makes the button slightly brighter */
+        }
+
+        /* Style for when you are actively pressing down on any clickable button */
+        button:not(:disabled):active {
+            transform: translateY(1px);
+            /* Gives a "push down" effect */
+            filter: brightness(90%);
+            /* Makes the button slightly darker */
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translate3d(0, -10vh, 0) rotate(0deg);
+                opacity: 1;
+            }
+
+            60% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate3d(var(--drift, 12vw), 110vh, 0) rotate(calc(var(--spin, 1) * 540deg));
+                opacity: 0;
+            }
+        }
+
+        @keyframes boardGlow {
+            0% {
+                box-shadow: var(--shadow), 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+
+            40% {
+                box-shadow: var(--shadow), 0 0 32px 12px var(--glow-accent);
+            }
+
+            100% {
+                box-shadow: var(--shadow), 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        @keyframes orbFloat {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate3d(0, -30px, 0) scale(1.1);
+            }
+        }
+
+        @keyframes glowWash {
+            0% {
+                opacity: 0;
+            }
+
+            40% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes auroraFade {
+            0% {
+                opacity: 0.1;
+            }
+
+            100% {
+                opacity: 0.35;
+            }
+        }
+
+        @keyframes numberPulse {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            20% {
+                transform: translateY(-4px) scale(1.06);
+            }
+
+            60% {
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes wrongPulse {
+            0% {
+                transform: scale(1);
+                background: color-mix(in oklab, var(--error) 35%, #ffffff);
+            }
+
+            50% {
+                transform: scale(1.08);
+                background: color-mix(in oklab, var(--error) 45%, #fff0f0);
+            }
+
+            100% {
+                transform: scale(1);
+                background: color-mix(in oklab, var(--error) 20%, transparent);
+            }
+        }
+
+        @keyframes wrongSection {
+            0% {
+                background: color-mix(in oklab, var(--error) 30%, transparent);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        @keyframes rowGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent) 40%, #fff);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        @keyframes boxGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent-2) 35%, #fff);
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+
+        @keyframes comboGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent) 45%, #fff);
+                box-shadow: 0 0 18px color-mix(in oklab, var(--accent-2) 50%, transparent);
+            }
+
+            100% {
+                background: transparent;
+                box-shadow: none;
+            }
+        }
+
+        @keyframes numberGlow {
+            0% {
+                background: color-mix(in oklab, var(--accent-2) 35%, #fff);
+                transform: scale(1.05);
+            }
+
+            100% {
+                background: transparent;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes boardWin {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+
+            100% {
+                box-shadow: 0 0 40px 15px color-mix(in oklab, var(--accent) 40%, transparent);
+            }
+        }
+
+        /* Mobile-specific optimizations */
+        @media (max-width: 759px) {
+            body {
+                padding: 4px;
+                align-items: flex-start;
+            }
+
+            .app {
+                gap: 6px;
+                width: 100%;
+                max-width: calc(100vw - 8px);
+                display: flex;
+                flex-direction: column;
+            }
+
+            header {
+                padding: 6px 8px;
+                gap: 6px;
+            }
+
+            .player-hud {
+                order: 1;
+                width: 100%;
+            }
+
+            .top-stats {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                order: 2;
+            }
+
+            .grid-wrap {
+                order: 3;
+            }
+
+            .side,
+            .pad {
+                order: 4;
+            }
+
+            .legend {
+                order: 5;
+            }
+
+            .level-card {
+                width: 100%;
+                padding: 0;
+                border: none;
+                background: transparent;
+            }
+
+            .level-card summary {
+                background: var(--panel);
+                border-radius: var(--radius);
+                padding: 8px 12px;
+                box-shadow: var(--shadow);
+            }
+
+            .level-card-body {
+                margin-top: 8px;
+                background: var(--panel);
+                border-radius: var(--radius);
+                padding: 12px;
+                box-shadow: var(--shadow);
+                border: 1px solid color-mix(in oklab, var(--grid-line) 70%, transparent);
+            }
+
+            .board {
+                padding: 8px;
+            }
+
+            .grid-wrap {
+                gap: 8px;
+            }
+
+            .pad {
+                padding: 8px;
+                gap: 6px;
+            }
+            .utils {
+                width: 77px;
+            }
+            .app .util-buttons {
+                gap: 6px;
+            }
+
+            /* Ensure buttons don't overflow */
+            select {
+                min-width: 120px;
+            }
+
+            button {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+        }
+
+        /* Extra small mobile screens */
+        @media (max-width: 360px) {
+            body {
+                padding: 2px;
+                box-sizing: border-box;
+            }
+
+            .app {
+                gap: 4px;
+                max-width: calc(100vw - 4px);
+                box-sizing: border-box;
+            }
+
+            header {
+                padding: 4px 6px;
+                gap: 4px;
+                box-sizing: border-box;
+            }
+
+            .board {
+                padding: 6px;
+                box-sizing: border-box;
+                min-width: 0;
+                /* Allow shrinking */
+            }
+
+            .grid {
+                min-width: 0;
+                /* Allow shrinking */
+            }
+
+            .pad {
+                padding: 6px;
+                gap: 4px;
+                box-sizing: border-box;
+                min-width: 0;
+                /* Allow shrinking */
+            }
+
+            .grid-wrap {
+                gap: 6px;
+                min-width: 0;
+                /* Allow shrinking */
+            }
+
+            .util-buttons {
+                gap: 4px !important;
+                flex-wrap: wrap;
+            }
+
+            select {
+                min-width: 100px;
+                font-size: 13px;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            button {
+                padding: 6px 8px;
+                font-size: 13px;
+                box-sizing: border-box;
+                min-width: 0;
+                /* Allow shrinking */
+            }
+
+            .cell {
+                font-size: clamp(12px, 4vw, 20px);
+                min-width: 0;
+                /* Allow shrinking */
+            }
+
+            /* Constrain main layout containers to respect container width */
+            .app,
+            .board,
+            .pad,
+            .grid-wrap,
+            .util-buttons,
+            header,
+            select,
+            button {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+        }
+
+        /* Desktop tweaks */
+        @media (min-width: 760px) {
+            .app {
+                /* Use single column layout like mobile, but with max width constraint */
+                grid-template-columns: 1fr;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            .board {
+                max-width: 500px;
+                margin-inline: auto;
+                width: 100%
+            }
+
+            .pad {
+                grid-template-columns: repeat(5, 1fr);
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            /* Ensure elements stack vertically like mobile */
+            .grid-wrap,
+            .side {
+                grid-column: 1;
+            }
+
+            .level-summary-action {
+                display: none;
+            }
+        }
+    
